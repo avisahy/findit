@@ -317,8 +317,7 @@ button:disabled {
   width: 100%;
   min-height: 100px;
   max-width: 200px;
-  background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);
-  display: flex;
+  background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);  
   align-items: center;
   position: relative;
   overflow: hidden;  
