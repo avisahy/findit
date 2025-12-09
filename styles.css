@@ -87,6 +87,16 @@ body {
   gap: 4px;
 }
 
+.app-title-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+
 #app {
   padding-top: var(--app-bar-height);
   min-height: 100vh;
