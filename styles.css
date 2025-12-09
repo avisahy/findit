@@ -315,11 +315,12 @@ button:disabled {
 
 .item-thumb-wrapper {
   width: 100%;
-  aspect-ratio: 1 / 1;   /* ✅ keeps square shape on desktop */
+  min-height: 100px;
   background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;  
 }
 
 :root.dark .item-thumb-wrapper {
