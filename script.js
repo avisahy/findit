@@ -60,6 +60,12 @@ const backFromAbout = document.getElementById("backFromAbout");
 const settingsBtn = document.getElementById("settingsBtn");
 const aboutBtn = document.getElementById("aboutBtn");
 
+const homeBtn = document.getElementById("homeBtn");
+
+homeBtn.addEventListener("click", () => {
+  showView("home");
+});
+
 // Settings
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 const themeIcon = document.getElementById("themeIcon");
