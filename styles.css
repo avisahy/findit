@@ -457,7 +457,7 @@ button:disabled {
 .image-preview-wrapper {
   width: 100%;
   min-height: 280px; /* adjust for mobile */
-  padding-top: 100%; /* perfect square */
+  /* padding-top: 100%;  perfect square */
   position: relative;
   border-radius: 12px;
   overflow: hidden;
