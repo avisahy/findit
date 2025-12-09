@@ -456,11 +456,10 @@ button:disabled {
 /* Add/Edit preview – image fills the card */
 .image-preview-wrapper {
   width: 100%;
-  aspect-ratio: 1 / 1; /* square card */
+  padding-top: 100%; /* perfect square */
+  position: relative;
   border-radius: 12px;
   overflow: hidden;
-  display: block;
-  position: relative;
 }
 
 .image-preview-wrapper img {
@@ -474,11 +473,10 @@ button:disabled {
 /* Details view – image fills the card */
 .details-image-wrapper {
   width: 100%;
-  aspect-ratio: 1 / 1; /* same clean square layout */
+  padding-top: 100%; /* perfect square */
+  position: relative;
   border-radius: 12px;
-  overflow: hidden;  
-  display: block;
-  position: relative;  
+  overflow: hidden;
 }
 
 .details-image-wrapper img {
@@ -526,11 +524,10 @@ button:disabled {
 
 .details-image-wrapper {
   width: 100%;
-  aspect-ratio: 1 / 1; /* square card */
+  padding-top: 100%; /* perfect square */
+  position: relative;
   border-radius: 12px;
   overflow: hidden;
-  display: block;
-  position: relative;  
 }
 
 .details-image-wrapper img {
