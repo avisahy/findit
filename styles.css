@@ -259,6 +259,23 @@ button:disabled {
   color: var(--color-text);
 }
 
+/* Force readable text inside <select> and <option> */
+select,
+select option {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+
+/* Improve border visibility */
+select {
+  border: 1px solid var(--color-border) !important;
+}
+
+/* Optional: hover highlight */
+select option:hover {
+  background-color: var(--color-primary-soft) !important;
+}
+
 /* Items grid */
 
 .items-grid {
