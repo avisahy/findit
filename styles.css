@@ -292,7 +292,7 @@ button:disabled {
 
 .items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-top: 8px;
 }
@@ -315,12 +315,11 @@ button:disabled {
 
 .item-thumb-wrapper {
   width: 100%;
-  min-height: 100px;
-  max-width: 200px;
-  background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);  
-  align-items: center;
+  aspect-ratio: 1 / 1;   /* ✅ keeps square shape on desktop */
+  background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);
+  border-radius: 8px;
+  overflow: hidden;
   position: relative;
-  overflow: hidden;  
 }
 
 :root.dark .item-thumb-wrapper {
@@ -719,4 +718,3 @@ button:disabled {
     padding-right: 16px;
   }
 }
-
