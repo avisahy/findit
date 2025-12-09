@@ -259,6 +259,25 @@ button:disabled {
   color: var(--color-text);
 }
 
+/* Make sure dropdown text is visible in both themes */
+.filter-wrapper select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* This helps on some browsers where option text becomes white on white */
+.filter-wrapper select option {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
 /* Items grid */
 
 .items-grid {
