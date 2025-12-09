@@ -272,6 +272,7 @@ function updateCategoryOptions() {
   categories.forEach((cat) => {
     const opt = document.createElement("option");
     opt.value = cat;
+    opt.textContent = cat; // <- important for visibility
     categoryFilter.appendChild(opt);
 
     const opt2 = document.createElement("option");
