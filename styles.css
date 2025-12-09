@@ -456,6 +456,7 @@ button:disabled {
 /* Add/Edit preview – image fills the card */
 .image-preview-wrapper {
   width: 100%;
+  min-height: 280px; /* adjust for mobile */
   padding-top: 100%; /* perfect square */
   position: relative;
   border-radius: 12px;
@@ -474,7 +475,6 @@ button:disabled {
 /* Details view – image fills the card */
 .details-image-wrapper {
   width: 100%;
-  min-height: 280px; /* adjust for mobile */
   padding-top: 100%; /* perfect square */
   position: relative;
   border-radius: 12px;
