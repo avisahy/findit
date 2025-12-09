@@ -305,8 +305,6 @@ button:disabled {
   display: flex;
   flex-direction: row;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
-  padding: 8px;
-  gap: 6px;  
 }
 
 .item-card:hover {
