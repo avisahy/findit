@@ -509,15 +509,17 @@ button:disabled {
 }
 
 .details-image-wrapper {
-  max-height: 320px;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* square card */
+  border-radius: 12px;
   overflow: hidden;
-  background: #111;
 }
 
 .details-image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* fill the card */
+  display: block;
 }
 
 .details-text {
