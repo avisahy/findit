@@ -464,6 +464,7 @@ button:disabled {
   aspect-ratio: 1 / 1; /* same clean square layout */
   border-radius: 12px;
   overflow: hidden;
+  background: #111; /* keep your dark background if no image */
 }
 
 .details-image-wrapper img {
