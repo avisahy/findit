@@ -303,7 +303,7 @@ button:disabled {
   overflow: hidden;
   box-shadow: var(--shadow-soft);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
 }
 
