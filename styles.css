@@ -115,6 +115,11 @@ body {
   display: block;
 }
 
+/* ✅ Fix mobile shrinking issue */
+.view {
+  display: block; /* force normal flow */
+}
+
 /* Buttons */
 
 button {
@@ -468,6 +473,12 @@ button:disabled {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* ✅ Ensure image containers can grow on mobile */
+.image-preview-wrapper,
+.details-image-wrapper {
+  flex-shrink: 0;
 }
 
 /* Details view – image fills the card */
