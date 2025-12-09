@@ -456,37 +456,41 @@ button:disabled {
 /* Add/Edit preview – image fills the card */
 .image-preview-wrapper {
   width: 100%;
-  padding-top: 100%; /* perfect square */
+  min-height: 280px;   /* ✅ ensures full image on mobile */
+  /*padding-top: 100%;  perfect square */
   position: relative;
   border-radius: 12px;
   overflow: hidden;
 }
 
 .image-preview-wrapper img {
-  position: absolute;
+  /*position: absolute;
   top: 0;
-  left: 0;
+  left: 0; */
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 /* Details view – image fills the card */
 .details-image-wrapper {
   width: 100%;
-  padding-top: 100%; /* perfect square */
+  min-height: 280px;   /* ✅ ensures full image on mobile */
+  /*padding-top: 100%;  perfect square */
   position: relative;
   border-radius: 12px;
   overflow: hidden;
 }
 
 .details-image-wrapper img {
-  position: absolute;
+  /*position: absolute;
   top: 0;
-  left: 0;
+  left: 0; */
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .form-actions {
