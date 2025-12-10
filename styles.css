@@ -315,7 +315,8 @@ button:disabled {
 
 .item-thumb-wrapper {
   width: 100px;
-  min-height: 100px;
+  /* min-height: 100px; */
+  height: 200px;
   background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);
   display: flex;
   align-items: center;
