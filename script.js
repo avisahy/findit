@@ -368,6 +368,8 @@ function openDetailsView(id) {
 
   // ✅ Show arrows when entering details, start auto-hide timer
   showArrows();
+
+  showTooltipOnce();  // ✅ tooltip appears only first time
 }
 
 /* ---------- Image handling (compression) ---------- */
@@ -648,4 +650,22 @@ function showArrows() {
 views.details.addEventListener("touchstart", showArrows);
 views.details.addEventListener("click", showArrows);
 
+const detailsTooltip = document.getElementById("detailsTooltip");
+let tooltipShown = false;
+
+function showTooltipOnce() {
+  if (tooltipShown) return; // only show once
+  tooltipShown = true;
+
+  detailsTooltip.classList.remove("hidden");
+  detailsTooltip.classList.add("show");
+
+  // Hide after 3 seconds
+  setTimeout(() => {
+    detailsTooltip.classList.remove("show");
+    setTimeout(() => {
+      detailsTooltip.classList.add("hidden");
+    }, 300); // wait for fade-out
+  }, 3000);
+}
 
