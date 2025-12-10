@@ -224,7 +224,7 @@ button:disabled {
   transition: opacity 0.3s ease;
 }
 
-.nav-btn.hidden {
+.nav-btn.hide {
   opacity: 0;
   pointer-events: none; /* prevent clicks when hidden */
 }
