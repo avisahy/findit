@@ -627,4 +627,29 @@ const nextItemBtn = document.getElementById("nextItemBtn");
 prevItemBtn.addEventListener("click", showPreviousItem);
 nextItemBtn.addEventListener("click", showNextItem);
 
+// Auto-hide arrows after 5 seconds
+let hideTimeout;
+
+function showArrows() {
+  prevItemBtn.classList.remove("hidden");
+  nextItemBtn.classList.remove("hidden");
+
+  clearTimeout(hideTimeout);
+  hideTimeout = setTimeout(() => {
+    prevItemBtn.classList.add("hidden");
+    nextItemBtn.classList.add("hidden");
+  }, 5000); // 5 seconds
+}
+
+// Show arrows when entering details view
+views.details.addEventListener("transitionend", () => {
+  if (currentView === "details") {
+    showArrows();
+  }
+});
+
+// Also show arrows when user taps/swipes inside details view
+views.details.addEventListener("touchstart", showArrows);
+views.details.addEventListener("click", showArrows);
+
 
