@@ -705,3 +705,10 @@ installAppBtn.addEventListener("click", async () => {
   deferredPrompt = null;
 });
 
+// ✅ iOS fallback
+if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+  installAppBtn.style.display = "inline-block"; // show button always
+  installAppBtn.addEventListener("click", () => {
+    alert("On iOS: Tap the Share button, then 'Add to Home Screen'.");
+  });
+}
