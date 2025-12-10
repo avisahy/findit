@@ -259,22 +259,6 @@ below style
 
 */
 
-.switch-btn {
-  padding: 6px 14px;
-  font-size: 13px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-  cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
-}
-
-.switch-btn:hover {
-  background-color: var(--color-primary);
-  color: #fff;
-}
-
 /* Floating action button */
 
 
