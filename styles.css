@@ -767,27 +767,11 @@ below style
 .image-preview-wrapper img,
 .details-image-wrapper img {
   max-width: 100%;
-  max-height: 220px;   /* smaller on mobile */
+  max-height: 400px;   /* smaller on mobile */
   object-fit: contain; /* show full image, no cropping */
   display: block;
   margin: 0 auto;
 }
-
-/* Larger images on bigger screens */
-@media (min-width: 640px) {
-  .image-preview-wrapper img,
-  .details-image-wrapper img {
-    max-height: 300px; /* medium screens */
-  }
-}
-
-@media (min-width: 960px) {
-  .image-preview-wrapper img,
-  .details-image-wrapper img {
-    max-height: 400px; /* desktop screens */
-  }
-}
-
 
 /* Responsive */
 
