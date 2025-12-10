@@ -739,7 +739,7 @@ below style
 
 .details-tooltip {
   position: absolute;
-  top: 20px; /* ✅ pops at the top */
+  top: 50px; /* ✅ pops at the top */
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
   background: rgba(0,0,0,0.85);
