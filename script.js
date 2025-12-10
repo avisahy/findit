@@ -567,3 +567,64 @@ importInput.addEventListener("change", (e) => {
   e.target.value = "";
 });
 
+/* ---------- Swipe navigation in details view ---------- */
+
+let currentItemIndex = null;
+
+// Update openDetailsView to also set currentItemIndex
+const originalOpenDetailsView = openDetailsView;
+openDetailsView = function(id) {
+  const idx = items.findIndex((i) => i.id === id);
+  if (idx === -1) return;
+  currentItemIndex = idx;
+  originalOpenDetailsView(id);
+};
+
+function showNextItem() {
+  if (currentItemIndex < items.length - 1) {
+    openDetailsView(items[currentItemIndex + 1].id);
+  }
+}
+
+function showPreviousItem() {
+  if (currentItemIndex > 0) {
+    openDetailsView(items[currentItemIndex - 1].id);
+  }
+}
+
+const detailsView = views.details;
+let startX = 0;
+
+detailsView.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+});
+
+detailsView.addEventListener("touchend", (e) => {
+  const endX = e.changedTouches[0].clientX;
+  const diffX = endX - startX;
+
+  if (Math.abs(diffX) > 50) { // threshold in pixels
+    if (diffX > 0) {
+      showPreviousItem(); // swipe right
+    } else {
+      showNextItem();     // swipe left
+    }
+  }
+});
+
+// Optional: desktop arrow key support
+document.addEventListener("keydown", (e) => {
+  if (currentView === "details") {
+    if (e.key === "ArrowRight") showNextItem();
+    if (e.key === "ArrowLeft") showPreviousItem();
+  }
+});
+
+// On-screen navigation buttons
+const prevItemBtn = document.getElementById("prevItemBtn");
+const nextItemBtn = document.getElementById("nextItemBtn");
+
+prevItemBtn.addEventListener("click", showPreviousItem);
+nextItemBtn.addEventListener("click", showNextItem);
+
+
