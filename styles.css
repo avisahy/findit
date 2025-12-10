@@ -221,6 +221,12 @@ button:disabled {
   height: 40px;
   cursor: pointer;
   font-size: 20px;
+  transition: opacity 0.3s ease;
+}
+
+.nav-btn.hidden {
+  opacity: 0;
+  pointer-events: none; /* prevent clicks when hidden */
 }
 
 #prevItemBtn { left: 8px; }
