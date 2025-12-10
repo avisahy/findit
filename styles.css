@@ -536,15 +536,6 @@ below style
   display: block;
 }
 
-.image-preview-wrapper img,
-.details-image-wrapper img {
-  max-width: 100%;
-  max-height: 250px;   /* adjust as needed */
-  object-fit: contain; /* show the whole image, no cropping */
-  display: block;
-  margin: 0 auto;      /* center the image */
-}
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -770,6 +761,31 @@ below style
 
 .details-tooltip.hidden {
   display: none;
+}
+
+/* Responsive image scaling for Add/Edit and Details views */
+.image-preview-wrapper img,
+.details-image-wrapper img {
+  max-width: 100%;
+  max-height: 220px;   /* smaller on mobile */
+  object-fit: contain; /* show full image, no cropping */
+  display: block;
+  margin: 0 auto;
+}
+
+/* Larger images on bigger screens */
+@media (min-width: 640px) {
+  .image-preview-wrapper img,
+  .details-image-wrapper img {
+    max-height: 300px; /* medium screens */
+  }
+}
+
+@media (min-width: 960px) {
+  .image-preview-wrapper img,
+  .details-image-wrapper img {
+    max-height: 400px; /* desktop screens */
+  }
 }
 
 
