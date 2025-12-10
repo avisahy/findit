@@ -365,6 +365,9 @@ function openDetailsView(id) {
   }
 
   showView("details");
+
+  // ✅ Show arrows when entering details, start auto-hide timer
+  showArrows();
 }
 
 /* ---------- Image handling (compression) ---------- */
@@ -640,13 +643,6 @@ function showArrows() {
     nextItemBtn.classList.add("hide");
   }, 5000); // 5 seconds
 }
-
-// Show arrows when entering details view
-views.details.addEventListener("transitionend", () => {
-  if (currentView === "details") {
-    showArrows();
-  }
-});
 
 // Also show arrows when user taps/swipes inside details view
 views.details.addEventListener("touchstart", showArrows);
