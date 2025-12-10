@@ -653,9 +653,6 @@ views.details.addEventListener("click", showArrows);
 const detailsTooltip = document.getElementById("detailsTooltip");
 let tooltipShown = false;
 
-document.addEventListener("DOMContentLoaded", () => {
-  const detailsTooltip = document.getElementById("detailsTooltip");
-
   function showTooltipOnce() {
     // Only run if tooltip element exists
     if (!detailsTooltip) return;
