@@ -203,6 +203,18 @@
 
         <div class="settings-item">
           <div>
+            <h3>Import data</h3>
+            <p>Load items from a JSON backup file.</p>
+          </div>
+          <label class="btn-outlined">
+            <span class="material-icons-outlined">file_download</span>
+            <span>Import</span>
+            <input type="file" id="importInput" accept="application/json" hidden />
+          </label>
+        </div>
+        
+        <div class="settings-item">
+          <div>
             <h3>Export data</h3>
             <p>Download all items as a JSON file.</p>
           </div>
@@ -214,15 +226,12 @@
 
         <div class="settings-item">
           <div>
-            <h3>Import data</h3>
-            <p>Load items from a JSON backup file.</p>
+            <h3>Install App</h3>
+            <p>Add this app to your desktop or mobile device</p>
           </div>
-          <label class="btn-outlined">
-            <span class="material-icons-outlined">file_download</span>
-            <span>Import</span>
-            <input type="file" id="importInput" accept="application/json" hidden />
-          </label>
+          <button id="installAppBtn" class="btn-outlined">Install</button>
         </div>
+
       </div>
     </section>
 
