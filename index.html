@@ -79,27 +79,6 @@
       <form id="itemForm" class="form">
         <input type="hidden" id="itemId" />
 
-        <label class="field">
-          <span class="field-label">Name</span>
-          <input type="text" id="itemName" required maxlength="120" />
-        </label>
-
-        <label class="field">
-          <span class="field-label">Category</span>
-          <input type="text" id="itemCategory" list="categoryList" />
-          <datalist id="categoryList"></datalist>
-        </label>
-
-        <label class="field">
-          <span class="field-label">Location</span>
-          <input type="text" id="itemLocation" placeholder="Room, shelf, box, etc." />
-        </label>
-
-        <label class="field">
-          <span class="field-label">Notes</span>
-          <textarea id="itemNotes" rows="3"></textarea>
-        </label>
-        
         <div class="field">
           <div class="field-label-row">
             <span class="field-label">Picture</span>
@@ -121,6 +100,27 @@
             <img id="imagePreview" alt="Item image preview" />
           </div>
         </div>
+        
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input type="text" id="itemName" required maxlength="120" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Category</span>
+          <input type="text" id="itemCategory" list="categoryList" />
+          <datalist id="categoryList"></datalist>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Location</span>
+          <input type="text" id="itemLocation" placeholder="Room, shelf, box, etc." />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Notes</span>
+          <textarea id="itemNotes" rows="3"></textarea>
+        </label>
 
         <div class="form-actions">
           <button type="submit" class="btn-primary">
