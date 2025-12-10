@@ -209,6 +209,28 @@ button:disabled {
   background-color: transparent;
 }
 
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+#prevItemBtn {
+  left: 8px;
+}
+
+#nextItemBtn {
+  right: 8px;
+}
+
 /* Floating action button */
 
 .fab {
