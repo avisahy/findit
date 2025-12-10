@@ -82,7 +82,6 @@
         <div class="field">
           <div class="field-label-row">
             <span class="field-label">Picture</span>
-            <button type="button" class="chip-btn" id="clearImageBtn">Remove Picture</button>
           </div>
           <div class="image-input-row">
             <label class="btn-outlined">
@@ -95,6 +94,10 @@
               <span>Gallery</span>
               <input type="file" id="itemImageFile" accept="image/*" hidden />
             </label>
+            <button type="button" class="btn-outlined hidden" id="clearImageBtn">
+              <span class="material-icons-outlined">delete</span>
+              <span>Remove Picture</span>
+            </button>
           </div>
           <div id="imagePreviewWrapper" class="image-preview-wrapper hidden">
             <img id="imagePreview" alt="Item image preview" />
