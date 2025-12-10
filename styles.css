@@ -225,6 +225,13 @@ button:disabled {
 
 #prevItemBtn { left: 8px; }
 #nextItemBtn { right: 8px; }
+
+/* Optional: only show on mobile */
+@media (max-width: 768px) {
+  .nav-btn {
+    display: block;
+  }
+  
 /*
 below style
 
