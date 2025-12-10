@@ -653,19 +653,24 @@ views.details.addEventListener("click", showArrows);
 const detailsTooltip = document.getElementById("detailsTooltip");
 let tooltipShown = false;
 
+const detailsTooltip = document.getElementById("detailsTooltip");
+
 function showTooltipOnce() {
-  if (tooltipShown) return; // only show once per session
-  tooltipShown = true;
+  // Check localStorage to see if tooltip was already shown
+  if (localStorage.getItem("tooltipShown") === "true") return;
+
+  // Mark as shown permanently
+  localStorage.setItem("tooltipShown", "true");
 
   detailsTooltip.classList.remove("hidden");
   detailsTooltip.classList.add("show");
 
-  // Hide after 3 seconds
+  // Hide after 5 seconds
   setTimeout(() => {
     detailsTooltip.classList.remove("show");
     setTimeout(() => {
       detailsTooltip.classList.add("hidden");
     }, 400); // wait for fade-out
-  }, 3000);
+  }, 5000);
 }
 
