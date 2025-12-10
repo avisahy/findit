@@ -754,6 +754,17 @@ below style
   display: none;
 }
 
+
+.btn-outlined .material-icons-outlined {
+  font-size: 18px;       /* match the size you use for file_upload */
+  line-height: 1;        /* remove extra vertical spacing */
+  vertical-align: middle; /* keep icon centered with text */
+  display: inline-flex;   /* flex helps center the glyph */
+  align-items: center;
+  justify-content: center;
+}
+
+
 /* Responsive */
 
 /* Responsive image scaling for Add/Edit and Details views */
