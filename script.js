@@ -401,6 +401,7 @@ function handleImageFile(file) {
       currentImageDataUrl = dataUrl;
       imagePreviewWrapper.classList.remove("hidden");
       imagePreview.src = dataUrl;
+      clearImageBtn.classList.remove("hidden"); // ✅ show Remove button
     };
     img.src = e.target.result;
   };
@@ -534,6 +535,7 @@ clearImageBtn.addEventListener("click", () => {
   currentImageDataUrl = null;
   imagePreviewWrapper.classList.add("hidden");
   imagePreview.src = "";
+  clearImageBtn.classList.add("hidden"); // ✅ hide Remove button again
 });
 
 // Detail view edit/delete
