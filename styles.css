@@ -223,13 +223,27 @@ button:disabled {
   font-size: 20px;
 }
 
-#prevItemBtn {
-  left: 8px;
+#prevItemBtn { left: 8px; }
+#nextItemBtn { right: 8px; }
+/*
+below style
+
+.details-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
 }
 
-#nextItemBtn {
-  right: 8px;
+.nav-btn {
+  background: var(--surface);
+  color: var(--on-surface);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
 }
+
+*/
 
 /* Floating action button */
 
