@@ -654,7 +654,7 @@ const detailsTooltip = document.getElementById("detailsTooltip");
 let tooltipShown = false;
 
 function showTooltipOnce() {
-  if (tooltipShown) return; // only show once
+  if (tooltipShown) return; // only show once per session
   tooltipShown = true;
 
   detailsTooltip.classList.remove("hidden");
@@ -665,7 +665,7 @@ function showTooltipOnce() {
     detailsTooltip.classList.remove("show");
     setTimeout(() => {
       detailsTooltip.classList.add("hidden");
-    }, 300); // wait for fade-out
+    }, 400); // wait for fade-out
   }, 3000);
 }
 
