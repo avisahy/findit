@@ -738,14 +738,14 @@ below style
 
 .details-tooltip {
   position: absolute;
-  bottom: 20px;
+  top: 20px; /* ✅ pops at the top */
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
+  transform: translateX(-50%) translateY(-20px);
   background: rgba(0,0,0,0.85);
   color: #fff;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
