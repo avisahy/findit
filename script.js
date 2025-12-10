@@ -650,8 +650,8 @@ function showArrows() {
 views.details.addEventListener("touchstart", showArrows);
 views.details.addEventListener("click", showArrows);
 
-document.addEventListener("DOMContentLoaded", () => {
-  const detailsTooltip = document.getElementById("detailsTooltip");
+const detailsTooltip = document.getElementById("detailsTooltip");
+let tooltipShown = false;
 
   function showTooltipOnce() {
     // Only run if tooltip element exists
@@ -673,7 +673,6 @@ document.addEventListener("DOMContentLoaded", () => {
         detailsTooltip.classList.add("hidden");
       }, 400); // wait for fade-out
     }, 5000);
-  }
-});
+  };
 
 
