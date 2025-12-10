@@ -320,9 +320,11 @@ function openEditView(id) {
   if (item.image) {
     imagePreviewWrapper.classList.remove("hidden");
     imagePreview.src = item.image;
+    clearImageBtn.classList.remove("hidden"); // ✅ show Remove button
   } else {
     imagePreviewWrapper.classList.add("hidden");
     imagePreview.src = "";
+    clearImageBtn.classList.add("hidden"); // ✅ hide Remove button
   }
 
   editViewTitle.textContent = "Edit item";
