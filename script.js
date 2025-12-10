@@ -651,7 +651,6 @@ views.details.addEventListener("touchstart", showArrows);
 views.details.addEventListener("click", showArrows);
 
 const detailsTooltip = document.getElementById("detailsTooltip");
-let tooltipShown = false;
 
   function showTooltipOnce() {
     // Only run if tooltip element exists
