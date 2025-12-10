@@ -261,6 +261,7 @@ below style
 
 /* Floating action button */
 
+
 .fab {
   position: fixed;
   right: 16px;
@@ -533,6 +534,15 @@ below style
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.image-preview-wrapper img,
+.details-image-wrapper img {
+  max-width: 100%;
+  max-height: 250px;   /* adjust as needed */
+  object-fit: contain; /* show the whole image, no cropping */
+  display: block;
+  margin: 0 auto;      /* center the image */
 }
 
 .form-actions {
