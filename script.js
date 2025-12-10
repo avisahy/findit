@@ -653,24 +653,30 @@ views.details.addEventListener("click", showArrows);
 const detailsTooltip = document.getElementById("detailsTooltip");
 let tooltipShown = false;
 
-const detailsTooltip = document.getElementById("detailsTooltip");
+document.addEventListener("DOMContentLoaded", () => {
+  const detailsTooltip = document.getElementById("detailsTooltip");
 
-function showTooltipOnce() {
-  // Check localStorage to see if tooltip was already shown
-  if (localStorage.getItem("tooltipShown") === "true") return;
+  function showTooltipOnce() {
+    // Only run if tooltip element exists
+    if (!detailsTooltip) return;
 
-  // Mark as shown permanently
-  localStorage.setItem("tooltipShown", "true");
+    // Check localStorage
+    if (localStorage.getItem("tooltipShown") === "true") return;
 
-  detailsTooltip.classList.remove("hidden");
-  detailsTooltip.classList.add("show");
+    // Mark as shown permanently
+    localStorage.setItem("tooltipShown", "true");
 
-  // Hide after 5 seconds
-  setTimeout(() => {
-    detailsTooltip.classList.remove("show");
+    detailsTooltip.classList.remove("hidden");
+    detailsTooltip.classList.add("show");
+
+    // Hide after 5 seconds
     setTimeout(() => {
-      detailsTooltip.classList.add("hidden");
-    }, 400); // wait for fade-out
-  }, 5000);
-}
+      detailsTooltip.classList.remove("show");
+      setTimeout(() => {
+        detailsTooltip.classList.add("hidden");
+      }, 400); // wait for fade-out
+    }, 5000);
+  }
+});
+
 
