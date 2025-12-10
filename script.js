@@ -641,12 +641,12 @@ function showArrows() {
   }, 5000); // 5 seconds
 }
 
-// Show arrows when entering details view
-views.details.addEventListener("transitionend", () => {
-  if (currentView === "details") {
-    showArrows();
-  }
-});
+// Call showArrows when opening details
+const originalOpenDetailsView = openDetailsView;
+openDetailsView = function(id) {
+  originalOpenDetailsView(id);
+  showArrows(); // ✅ ensures arrows appear and timer starts
+};
 
 // Also show arrows when user taps/swipes inside details view
 views.details.addEventListener("touchstart", showArrows);
