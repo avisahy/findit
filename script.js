@@ -303,6 +303,7 @@ function openAddView() {
   currentImageDataUrl = null;
   imagePreviewWrapper.classList.add("hidden");
   imagePreview.src = "";
+  clearImageBtn.classList.add("hidden"); // ✅ hide Remove button
   editViewTitle.textContent = "Add item";
   showView("edit");
 }
