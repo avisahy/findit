@@ -343,34 +343,29 @@ below style
 
 .items-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* flexible tiles */
   gap: 10px;
   margin-top: 8px;
 }
 
 .item-card {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
+  flex-direction: column;   /* stack image only */
+  border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
-  display: flex;
-  flex-direction: row;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  background-color: var(--color-surface);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .item-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  background-color: var(--color-bg-elevated);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 
 .item-thumb-wrapper {
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle at 10% 0%, #eceff1, #c5cae9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 160px; /* adjust tile height */
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -381,7 +376,8 @@ below style
 .item-thumb {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* fill tile nicely */
+  display: block;
 }
 
 .item-no-thumb {
@@ -390,12 +386,7 @@ below style
 }
 
 .item-card-body {
-  flex: 1;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
+  display: none;
 }
 
 .item-title-row {
