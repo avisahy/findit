@@ -631,13 +631,13 @@ nextItemBtn.addEventListener("click", showNextItem);
 let hideTimeout;
 
 function showArrows() {
-  prevItemBtn.classList.remove("hidden");
-  nextItemBtn.classList.remove("hidden");
+  prevItemBtn.classList.remove("hide");
+  nextItemBtn.classList.remove("hide");
 
   clearTimeout(hideTimeout);
   hideTimeout = setTimeout(() => {
-    prevItemBtn.classList.add("hidden");
-    nextItemBtn.classList.add("hidden");
+    prevItemBtn.classList.add("hide");
+    nextItemBtn.classList.add("hide");
   }, 5000); // 5 seconds
 }
 
