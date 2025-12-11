@@ -340,39 +340,25 @@ function openDetailsView(id) {
   selectedItemId = item.id;
 
   detailsName.textContent = item.name || "(No name)";
-  if (item.category) {
-    detailsCategory.textContent = item.category;
-    detailsCategory.style.display = "inline-block";
-  } else {
-    detailsCategory.style.display = "none";
-  }
-  if (item.location) {
-    detailsLocation.textContent = "Location: " + item.location;
-    detailsLocation.style.display = "block";
-  } else {
-    detailsLocation.style.display = "none";
-  }
-  if (item.notes) {
-    detailsNotes.textContent = item.notes;
-    detailsNotes.style.display = "block";
-  } else {
-    detailsNotes.style.display = "none";
-  }
+  detailsCategory.textContent = item.category || "";
+  detailsLocation.textContent = item.location ? "Location: " + item.location : "";
+  detailsNotes.textContent = item.notes || "";
 
-  // ✅ Always show wrapper
   detailsImageWrapper.classList.remove("hidden");
+
   if (item.image) {
     detailsImage.src = item.image;
+    detailsImage.style.display = "block";
+    detailsNoImage.classList.add("hidden");
   } else {
-    detailsImage.removeAttribute("src"); // triggers placeholder
+    detailsImage.removeAttribute("src");
+    detailsImage.style.display = "none";
+    detailsNoImage.classList.remove("hidden");
   }
 
   showView("details");
-
-  // ✅ Show arrows when entering details, start auto-hide timer
   showArrows();
-
-  showTooltipOnce();  // ✅ tooltip appears only first time
+  showTooltipOnce();
 }
 
 /* ---------- Image handling (compression) ---------- */
