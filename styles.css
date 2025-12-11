@@ -259,6 +259,17 @@ below style
 
 */
 
+
+.btn-danger {
+  border-color: var(--color-danger, #d32f2f);
+  color: var(--color-danger, #d32f2f);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-danger, #d32f2f);
+  color: #fff;
+}
+
 /* Floating action button */
 
 
