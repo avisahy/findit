@@ -775,6 +775,24 @@ below style
   justify-content: center;
 }
 
+#detailsImage {
+  width: 100%;
+  height: 200px;              /* fixed height for consistency */
+  object-fit: contain;        /* scale real images nicely */
+  background-color: #f0f0f0;  /* light gray background */
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;                /* icon color */
+  font-size: 48px;            /* icon size */
+}
+
+#detailsImage:empty::before {
+  content: "photo_camera";    /* Material icon name */
+  font-family: "Material Icons Outlined";
+}
+
 
 /* Responsive */
 
