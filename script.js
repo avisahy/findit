@@ -710,3 +710,15 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
     alert("On iOS: Tap the Share button, then 'Add to Home Screen'.");
   });
 }
+
+deleteAllBtn.addEventListener("click", () => {
+  if (confirm("Are you sure you want to delete all app data? This cannot be undone.")) {
+    localStorage.removeItem(STORAGE_KEY_ITEMS);
+    items = [];
+    renderItems();
+    updateCategoryOptions();
+    alert("All app data has been deleted.");
+    showView("home");
+  }
+});
+
