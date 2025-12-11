@@ -359,12 +359,12 @@ function openDetailsView(id) {
     detailsNotes.style.display = "none";
   }
 
-  // ✅ Always show wrapper, use placeholder if no image
+  // ✅ Always show wrapper
   detailsImageWrapper.classList.remove("hidden");
   if (item.image) {
     detailsImage.src = item.image;
   } else {
-    detailsImage.removeAttribute("src"); // triggers CSS placeholder
+    detailsImage.removeAttribute("src"); // triggers placeholder
   }
 
   showView("details");
