@@ -679,14 +679,15 @@ const detailsTooltip = document.getElementById("detailsTooltip");
     }, 5000);
   };
 
-let deferredPrompt;
+
 const installAppRow = document.getElementById("installAppRow");
 const installAppBtn = document.getElementById("installAppBtn");
+let deferredPrompt;
 
 // Hide row by default
 installAppRow.style.display = "none";
 
-// Listen for install prompt
+// Listen for install prompt (desktop/Android)
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
@@ -696,9 +697,10 @@ window.addEventListener("beforeinstallprompt", (e) => {
 // Handle click
 installAppBtn.addEventListener("click", async () => {
   if (deferredPrompt) {
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  }
 });
 
 // iOS fallback
