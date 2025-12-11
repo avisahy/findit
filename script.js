@@ -742,7 +742,7 @@ deleteAllBtn.addEventListener("click", async () => {
       }
 
       alert("All app data has been deleted. The app will reload.");
-      location.reload(); // reload to start fresh
+      //location.reload(); // reload to start fresh
     } catch (err) {
       console.error("Failed to clear data", err);
       alert("Error clearing app data.");
