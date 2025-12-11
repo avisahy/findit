@@ -680,34 +680,30 @@ const detailsTooltip = document.getElementById("detailsTooltip");
   };
 
 let deferredPrompt;
+const installAppRow = document.getElementById("installAppRow");
 const installAppBtn = document.getElementById("installAppBtn");
 
-// Hide button by default
-installAppBtn.style.display = "none";
+// Hide row by default
+installAppRow.style.display = "none";
 
 // Listen for install prompt
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  installAppBtn.style.display = "inline-block"; // show button
+  installAppRow.style.display = "flex"; // show row when installable
 });
 
 // Handle click
 installAppBtn.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
+  if (deferredPrompt) {
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === "accepted") {
-    console.log("User accepted install");
-  } else {
-    console.log("User dismissed install");
-  }
   deferredPrompt = null;
 });
 
-// ✅ iOS fallback
+// iOS fallback
 if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-  installAppBtn.style.display = "inline-block"; // show button always
+  installAppRow.style.display = "flex"; // always show row on iOS
   installAppBtn.addEventListener("click", () => {
     alert("On iOS: Tap the Share button, then 'Add to Home Screen'.");
   });
