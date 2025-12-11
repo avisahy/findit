@@ -711,41 +711,56 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
   });
 }
 
-const deleteAllBtn = document.getElementById("deleteAllBtn");
 
-deleteAllBtn.addEventListener("click", async () => {
-  if (confirm("Are you sure you want to delete all app data? This will reset everything and cannot be undo.")) {
-    try {
-      // Clear localStorage
-      localStorage.clear();
+async function hardResetApp() {
+  try {
+    // Clear localStorage
+    localStorage.clear();
 
-      // Clear IndexedDB
+    // Clear IndexedDB
+    if (indexedDB.databases) {
       const databases = await indexedDB.databases();
       databases.forEach(db => {
         indexedDB.deleteDatabase(db.name);
       });
-
-      // Clear Cache API
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        for (const key of keys) {
-          await caches.delete(key);
-        }
-      }
-
-      // Unregister service workers
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const reg of registrations) {
-          await reg.unregister();
-        }
-      }
-
-      alert("All app data has been deleted. The app will reload.");
-      location.reload(); // reload to start fresh
-    } catch (err) {
-      console.error("Failed to clear data", err);
-      alert("Error clearing app data.");
     }
+
+    // Clear Cache API
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (const key of keys) {
+        await caches.delete(key);
+      }
+    }
+
+    // Unregister service workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        await reg.unregister();
+      }
+    }
+
+    // Clear non-HttpOnly cookies (best effort)
+    document.cookie.split(";").forEach(cookie => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      if (name) {
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      }
+    });
+
+    alert("All app data has been deleted. The app will reload.");
+    location.reload();
+  } catch (err) {
+    console.error("Failed to clear data", err);
+    alert("Error clearing app data.");
+  }
+}
+
+document.getElementById("deleteAllBtn").addEventListener("click", () => {
+  if (confirm("Are you sure you want to delete all app data? This will reset everything and cannot be undo.")) {
+    hardResetApp();
   }
 });
+
