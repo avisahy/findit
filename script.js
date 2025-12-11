@@ -712,12 +712,19 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
 }
 
 deleteAllBtn.addEventListener("click", () => {
-  if (confirm("Are you sure you want to delete all app data? This cannot be undone.")) {
-    localStorage.removeItem(STORAGE_KEY_ITEMS);
+  if (confirm("Are you sure you want to delete all app data? This will reset everything and cannot be undo.")) {
+    // Clear ALL localStorage for this app
+    localStorage.clear();
+    // Reset in-memory state
     items = [];
+    currentImageDataUrl = null;
+    selectedItemId = null;
+    pendingDeleteId = null;
+    // Re-render UI
     renderItems();
     updateCategoryOptions();
-    alert("All app data has been deleted.");
+    setTheme("light"); // reset theme to default
+    alert("All app data has been deleted. The app has been reset.");
     showView("home");
   }
 });
