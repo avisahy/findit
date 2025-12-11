@@ -711,21 +711,41 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
   });
 }
 
+const deleteAllBtn = document.getElementById("deleteAllBtn");
+
 deleteAllBtn.addEventListener("click", () => {
   if (confirm("Are you sure you want to delete all app data? This will reset everything and cannot be undo.")) {
-    // Clear ALL localStorage for this app
-    localStorage.clear();
-    // Reset in-memory state
-    items = [];
-    currentImageDataUrl = null;
-    selectedItemId = null;
-    pendingDeleteId = null;
-    // Re-render UI
-    renderItems();
-    updateCategoryOptions();
-    setTheme("light"); // reset theme to default
-    alert("All app data has been deleted. The app has been reset.");
-    showView("home");
+    try {
+      // Clear ALL localStorage for this app
+      localStorage.clear();
+      // Clear IndexedDB
+      const databases = await indexedDB.databases();
+      databases.forEach(db => {
+        indexedDB.deleteDatabase(db.name);
+      });
+
+      // Clear Cache API
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const key of keys) {
+          await caches.delete(key);
+        }
+      }
+
+      // Unregister service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+        }
+      }    
+
+      alert("All app data has been deleted. The app will reload.");
+      location.reload(); // reload to start fresh
+    } catch (err) {
+      console.error("Failed to clear data", err);
+      alert("Error clearing app data.");
+    }
   }
 });
 
