@@ -713,11 +713,12 @@ if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
 
 const deleteAllBtn = document.getElementById("deleteAllBtn");
 
-deleteAllBtn.addEventListener("click", () => {
+deleteAllBtn.addEventListener("click", async () => {
   if (confirm("Are you sure you want to delete all app data? This will reset everything and cannot be undo.")) {
     try {
-      // Clear ALL localStorage for this app
+      // Clear localStorage
       localStorage.clear();
+
       // Clear IndexedDB
       const databases = await indexedDB.databases();
       databases.forEach(db => {
@@ -738,7 +739,7 @@ deleteAllBtn.addEventListener("click", () => {
         for (const reg of registrations) {
           await reg.unregister();
         }
-      }    
+      }
 
       alert("All app data has been deleted. The app will reload.");
       location.reload(); // reload to start fresh
@@ -748,4 +749,3 @@ deleteAllBtn.addEventListener("click", () => {
     }
   }
 });
-
