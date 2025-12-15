@@ -189,3 +189,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("fab-add").addEventListener("click", () => {
   switchTab("add");
 });
+
+document.addEventListener("click", e => {
+  if (e.target.tagName === "BUTTON") {
+    const rect = e.target.getBoundingClientRect();
+    e.target.style.setProperty("--x", `${e.clientX - rect.left}px`);
+    e.target.style.setProperty("--y", `${e.clientY - rect.top}px`);
+  }
+});
