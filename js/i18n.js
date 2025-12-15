@@ -10,8 +10,8 @@ async function loadLanguage(lang) {
     return;
   }
   try {
-    const response = await fetch(`lang/${lang}.json`);
-    const data = await response.json();
+    const res = await fetch(`lang/${lang}.json`);
+    const data = await res.json();
     translations[lang] = data;
     currentLang = lang;
     applyLanguage();
@@ -28,7 +28,6 @@ function t(key, fallback) {
 function applyLanguage() {
   const dict = translations[currentLang] || {};
 
-  // Set text content
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     if (dict[key]) {
@@ -36,7 +35,6 @@ function applyLanguage() {
     }
   });
 
-  // Set placeholders
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (dict[key]) {
@@ -44,7 +42,6 @@ function applyLanguage() {
     }
   });
 
-  // Direction (RTL for Hebrew)
   const html = document.documentElement;
   if (currentLang === "he") {
     html.setAttribute("lang", "he");
@@ -61,9 +58,6 @@ function initLanguage() {
   const saved = localStorage.getItem(I18N_STORAGE_KEY);
   const lang = saved || "en";
   const select = document.getElementById("language-select");
-  if (select) {
-    select.value = lang;
-  }
+  if (select) select.value = lang;
   loadLanguage(lang);
 }
-
