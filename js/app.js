@@ -197,3 +197,14 @@ document.addEventListener("click", e => {
     e.target.style.setProperty("--y", `${e.clientY - rect.top}px`);
   }
 });
+
+document.getElementById("item-image").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+  const preview = document.getElementById("preview-img");
+  preview.src = url;
+  preview.style.display = "block";
+});
+
