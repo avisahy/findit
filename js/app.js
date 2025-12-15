@@ -2,15 +2,16 @@ const THEME_STORAGE_KEY = "findit-theme";
 
 function initTheme() {
   const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark =
+    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const theme = saved || (prefersDark ? "dark" : "light");
   applyTheme(theme);
 
   const btnTheme = document.getElementById("btn-theme");
   if (btnTheme) {
     btnTheme.addEventListener("click", () => {
-      const current = document.documentElement.classList.contains("dark") ? "dark" : "light";
-      applyTheme(current === "dark" ? "light" : "dark");
+      const isDark = document.documentElement.classList.contains("dark");
+      applyTheme(isDark ? "light" : "dark");
     });
   }
 }
@@ -39,6 +40,13 @@ function initTabs() {
       switchTab(btn.dataset.tab);
     });
   });
+
+  const fab = document.getElementById("fab-add");
+  if (fab) {
+    fab.addEventListener("click", () => {
+      switchTab("add");
+    });
+  }
 }
 
 function initLanguageSelector() {
@@ -52,6 +60,22 @@ function initLanguageSelector() {
 function initForm() {
   const form = document.getElementById("item-form");
   const resetBtn = document.getElementById("btn-reset-form");
+  const fileInput = document.getElementById("item-image");
+  const previewImg = document.getElementById("preview-img");
+
+  if (fileInput && previewImg) {
+    fileInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) {
+        previewImg.src = "";
+        previewImg.style.display = "none";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      previewImg.src = url;
+      previewImg.style.display = "block";
+    });
+  }
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
@@ -61,11 +85,9 @@ function initForm() {
     const description = form.querySelector("#item-description").value.trim();
     const category = form.querySelector("#item-category").value.trim();
     const tagsRaw = form.querySelector("#item-tags").value.trim();
-    const fileInput = form.querySelector("#item-image");
     const file = fileInput.files[0];
 
     let imageDataUrl = null;
-
     if (file) {
       try {
         imageDataUrl = await readFileAsDataUrl(file);
@@ -81,17 +103,10 @@ function initForm() {
           .filter(Boolean)
       : [];
 
-    const item = {
-      title,
-      description,
-      category,
-      tags,
-      imageDataUrl
-    };
+    const item = { title, description, category, tags, imageDataUrl };
 
     if (id) {
       item.id = Number(id);
-      // Preserve existing image if no new file
       if (!file) {
         const all = await dbGetAllItems();
         const existing = all.find(x => x.id === item.id);
@@ -166,6 +181,18 @@ function initDataActions() {
   });
 }
 
+function initRipple() {
+  document.addEventListener("click", e => {
+    if (e.target.tagName === "BUTTON") {
+      const rect = e.target.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      e.target.style.setProperty("--x", `${x}px`);
+      e.target.style.setProperty("--y", `${y}px`);
+    }
+  });
+}
+
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -182,29 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initForm();
   initSearch();
   initDataActions();
+  initRipple();
   refreshItems();
   registerServiceWorker();
 });
-
-document.getElementById("fab-add").addEventListener("click", () => {
-  switchTab("add");
-});
-
-document.addEventListener("click", e => {
-  if (e.target.tagName === "BUTTON") {
-    const rect = e.target.getBoundingClientRect();
-    e.target.style.setProperty("--x", `${e.clientX - rect.left}px`);
-    e.target.style.setProperty("--y", `${e.clientY - rect.top}px`);
-  }
-});
-
-document.getElementById("item-image").addEventListener("change", async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const url = URL.createObjectURL(file);
-  const preview = document.getElementById("preview-img");
-  preview.src = url;
-  preview.style.display = "block";
-});
-
