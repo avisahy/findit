@@ -20,6 +20,7 @@ function createItemCard(item) {
   if (item.imageDataUrl) {
     imgEl.src = item.imageDataUrl;
     imgEl.alt = item.title || "";
+    imgEl.style.display = "block";
   } else {
     imgEl.style.display = "none";
   }
@@ -56,6 +57,11 @@ function clearForm() {
   document.getElementById("item-category").value = "";
   document.getElementById("item-tags").value = "";
   document.getElementById("item-image").value = "";
+  const preview = document.getElementById("preview-img");
+  if (preview) {
+    preview.src = "";
+    preview.style.display = "none";
+  }
 }
 
 function fillFormForEdit(item) {
@@ -65,6 +71,14 @@ function fillFormForEdit(item) {
   document.getElementById("item-category").value = item.category || "";
   document.getElementById("item-tags").value = (item.tags || []).join(", ");
   document.getElementById("item-image").value = "";
+  const preview = document.getElementById("preview-img");
+  if (preview && item.imageDataUrl) {
+    preview.src = item.imageDataUrl;
+    preview.style.display = "block";
+  } else if (preview) {
+    preview.src = "";
+    preview.style.display = "none";
+  }
 }
 
 async function refreshItems() {
@@ -97,4 +111,3 @@ async function refreshItems() {
     listEl.appendChild(createItemCard(item));
   });
 }
-
