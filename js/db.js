@@ -5,9 +5,8 @@ const STORE_ITEMS = "items";
 let dbInstance = null;
 
 function openDb() {
-  if (dbInstance) {
-    return Promise.resolve(dbInstance);
-  }
+  if (dbInstance) return Promise.resolve(dbInstance);
+
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
@@ -36,10 +35,9 @@ async function dbAddItem(item) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_ITEMS, "readwrite");
     const store = tx.objectStore(STORE_ITEMS);
-    const request = store.add(item);
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    const req = store.add(item);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -48,10 +46,9 @@ async function dbUpdateItem(item) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_ITEMS, "readwrite");
     const store = tx.objectStore(STORE_ITEMS);
-    const request = store.put(item);
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
+    const req = store.put(item);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -60,10 +57,9 @@ async function dbDeleteItem(id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_ITEMS, "readwrite");
     const store = tx.objectStore(STORE_ITEMS);
-    const request = store.delete(id);
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -72,10 +68,9 @@ async function dbGetAllItems() {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_ITEMS, "readonly");
     const store = tx.objectStore(STORE_ITEMS);
-    const request = store.getAll();
-
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -84,14 +79,12 @@ async function dbClearAll() {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_ITEMS, "readwrite");
     const store = tx.objectStore(STORE_ITEMS);
-    const request = store.clear();
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
+    const req = store.clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
   });
 }
 
-// Export / import helpers
 async function dbExportData() {
   const items = await dbGetAllItems();
   return { items };
@@ -106,14 +99,10 @@ async function dbImportData(data) {
     const tx = db.transaction(STORE_ITEMS, "readwrite");
     const store = tx.objectStore(STORE_ITEMS);
 
-    // Clear then add
     const clearReq = store.clear();
     clearReq.onsuccess = () => {
       data.items.forEach(item => {
-        // Remove any auto IDs to avoid conflicts
-        if (!item.id) {
-          delete item.id;
-        }
+        if (!item.id) delete item.id;
         store.add(item);
       });
       tx.oncomplete = () => resolve();
@@ -122,4 +111,3 @@ async function dbImportData(data) {
     clearReq.onerror = () => reject(clearReq.error);
   });
 }
-
