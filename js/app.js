@@ -186,3 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
   registerServiceWorker();
 });
 
+document.getElementById("fab-add").addEventListener("click", () => {
+  switchTab("add");
+});
