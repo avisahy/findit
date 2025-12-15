@@ -35,6 +35,32 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: "";
+  position: absolute;
+  background: rgba(255,255,255,0.4);
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform .4s, opacity .6s;
+}
+
+button:active::after {
+  width: 200px;
+  height: 200px;
+  opacity: 1;
+  transform: scale(1);
+  left: var(--x);
+  top: var(--y);
+}
+
 /* Header */
 .app-header {
   backdrop-filter: blur(var(--blur));
