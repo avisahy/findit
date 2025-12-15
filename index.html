@@ -22,7 +22,6 @@
   <script defer src="js/app.js"></script>
 </head>
 <body>
-  <button id="fab-add">+</button>
   <header class="app-header">
     <div class="app-title" data-i18n="app_title">FindIt</div>
     <div class="header-actions">
@@ -36,125 +35,164 @@
     </div>
   </header>
 
-  <nav class="tab-bar" aria-label="Main navigation">
-    <button class="tab-button active" data-tab="catalog" data-i18n="tab_catalog">Catalog</button>
-    <button class="tab-button" data-tab="add" data-i18n="tab_add">Add</button>
-    <button class="tab-button" data-tab="settings" data-i18n="tab_settings">Settings</button>
-    <button class="tab-button" data-tab="about" data-i18n="tab_about">About</button>
-  </nav>
-
-  <main>
+  <main class="app-main">
     <!-- Catalog tab -->
     <section id="tab-catalog" class="tab-panel active" aria-labelledby="tab_catalog">
-      <div class="toolbar">
-        <input
-          id="search-input"
-          type="search"
-          placeholder="Search..."
-          data-i18n-placeholder="search_placeholder"
-          aria-label="Search items"
-        />
+      <div class="panel-inner">
+        <div class="toolbar">
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Search items..."
+            data-i18n-placeholder="search_placeholder"
+            aria-label="Search items"
+          />
+        </div>
+        <div id="items-list" class="items-grid" aria-live="polite"></div>
+        <p id="empty-message" class="empty-message" data-i18n="empty_message">
+          No items yet. Add your first item.
+        </p>
       </div>
-      <div id="items-list" class="items-grid" aria-live="polite"></div>
-      <p id="empty-message" class="empty-message" data-i18n="empty_message">No items yet.</p>
     </section>
 
     <!-- Add / Edit tab -->
     <section id="tab-add" class="tab-panel" aria-labelledby="tab_add">
-      <form id="item-form">
-        <input type="hidden" id="item-id" />
-        <img id="preview-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px;display:none;margin-bottom:10px;">
+      <div class="panel-inner">
+        <h2 data-i18n="tab_add">Add</h2>
 
-        <label for="item-title">
-          <span data-i18n="field_title">Title</span>
-          <input id="item-title" type="text" required />
-        </label>
+        <img
+          id="preview-img"
+          class="preview-img"
+          alt=""
+          style="display:none;"
+        />
 
-        <label for="item-description">
-          <span data-i18n="field_description">Description</span>
-          <textarea id="item-description" rows="3"></textarea>
-        </label>
+        <form id="item-form" class="card">
+          <input type="hidden" id="item-id" />
 
-        <label for="item-category">
-          <span data-i18n="field_category">Category</span>
-          <input id="item-category" type="text" />
-        </label>
+          <label for="item-title">
+            <span data-i18n="field_title">Title</span>
+            <input id="item-title" type="text" required />
+          </label>
 
-        <label for="item-tags">
-          <span data-i18n="field_tags">Tags (comma separated)</span>
-          <input id="item-tags" type="text" />
-        </label>
+          <label for="item-description">
+            <span data-i18n="field_description">Description</span>
+            <textarea id="item-description" rows="3"></textarea>
+          </label>
 
-        <label for="item-image">
-          <span data-i18n="field_image">Image</span>
-          <input id="item-image" type="file" accept="image/*" />
-        </label>
+          <label for="item-category">
+            <span data-i18n="field_category">Category</span>
+            <input id="item-category" type="text" />
+          </label>
 
-        <div class="form-actions">
-          <button type="submit" class="primary">
-            <span data-i18n="btn_save">Save</span>
-          </button>
-          <button type="button" id="btn-reset-form">
-            <span data-i18n="btn_reset">Reset</span>
-          </button>
-        </div>
-      </form>
+          <label for="item-tags">
+            <span data-i18n="field_tags">Tags (comma separated)</span>
+            <input id="item-tags" type="text" />
+          </label>
+
+          <label for="item-image" class="file-label">
+            <span data-i18n="field_image">Image</span>
+            <input id="item-image" type="file" accept="image/*" />
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary">
+              <span data-i18n="btn_save">Save</span>
+            </button>
+            <button type="button" id="btn-reset-form" class="secondary">
+              <span data-i18n="btn_reset">Reset</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <!-- Settings tab -->
     <section id="tab-settings" class="tab-panel" aria-labelledby="tab_settings">
-      <div class="settings-section">
-        <h2 data-i18n="settings_appearance">Appearance</h2>
-        <p data-i18n="settings_theme_hint">
-          Toggle dark or light mode using the moon icon in the header.
-        </p>
-      </div>
+      <div class="panel-inner">
+        <h2 data-i18n="tab_settings">Settings</h2>
 
-      <div class="settings-section">
-        <h2 data-i18n="settings_language">Language</h2>
-        <p data-i18n="settings_language_hint">
-          Choose your preferred language from the header selector.
-        </p>
-      </div>
+        <section class="card settings-section">
+          <h3 data-i18n="settings_appearance">Appearance</h3>
+          <p data-i18n="settings_theme_hint">
+            Toggle dark or light mode using the moon icon in the header.
+          </p>
+        </section>
 
-      <div class="settings-section">
-        <h2 data-i18n="settings_data">Data</h2>
-        <div class="settings-actions">
-          <button id="btn-export" class="secondary">
-            <span data-i18n="btn_export">Export data</span>
+        <section class="card settings-section">
+          <h3 data-i18n="settings_language">Language</h3>
+          <p data-i18n="settings_language_hint">
+            Choose your preferred language from the header selector.
+          </p>
+        </section>
+
+        <section class="card settings-section">
+          <h3 data-i18n="settings_data">Data</h3>
+          <div class="settings-actions">
+            <button id="btn-export" class="secondary">
+              <span data-i18n="btn_export">Export data</span>
+            </button>
+            <label class="button-like secondary">
+              <span data-i18n="btn_import">Import data</span>
+              <input id="import-file" type="file" accept="application/json" hidden />
+            </label>
+          </div>
+          <button id="btn-delete-all" class="danger">
+            <span data-i18n="btn_delete_all">Delete all data</span>
           </button>
-          <label class="button-like">
-            <span data-i18n="btn_import">Import data</span>
-            <input id="import-file" type="file" accept="application/json" hidden />
-          </label>
-        </div>
-        <button id="btn-delete-all" class="danger">
-          <span data-i18n="btn_delete_all">Delete all data</span>
-        </button>
-        <p class="warning-text" data-i18n="settings_delete_warning">
-          This action is permanent and cannot be undone.
-        </p>
+          <p class="warning-text" data-i18n="settings_delete_warning">
+            This action is permanent and cannot be undone.
+          </p>
+        </section>
       </div>
     </section>
 
     <!-- About tab -->
     <section id="tab-about" class="tab-panel" aria-labelledby="tab_about">
-      <h2 data-i18n="about_title">About FindIt</h2>
-      <p data-i18n="about_body">
-        FindIt is a simple personal catalog to keep track of your items using images, titles,
-        and tags. Works offline and can be installed on your device.
-      </p>
-      <p>
-        <span data-i18n="about_repo_label">GitHub project:</span>
-        <a href="https://github.com/avisahy/findit" target="_blank" rel="noopener">
-          github.com/avisahy/findit
-        </a>
-      </p>
+      <div class="panel-inner">
+        <section class="card">
+          <h2 data-i18n="about_title">About FindIt</h2>
+          <p data-i18n="about_body">
+            FindIt is a simple personal catalog to keep track of your items using images, titles,
+            and tags. Works offline and can be installed on your device.
+          </p>
+          <p>
+            <span data-i18n="about_repo_label">GitHub project:</span>
+            <a href="https://github.com/avisahy/findit" target="_blank" rel="noopener">
+              github.com/avisahy/findit
+            </a>
+          </p>
+        </section>
+      </div>
     </section>
   </main>
 
+  <!-- Bottom navigation -->
+  <nav class="tab-bar" aria-label="Main navigation">
+    <button class="tab-button active" data-tab="catalog">
+      <span class="tab-icon">📂</span>
+      <span data-i18n="tab_catalog">Catalog</span>
+    </button>
+    <button class="tab-button" data-tab="add">
+      <span class="tab-icon">➕</span>
+      <span data-i18n="tab_add">Add</span>
+    </button>
+    <button class="tab-button" data-tab="settings">
+      <span class="tab-icon">⚙️</span>
+      <span data-i18n="tab_settings">Settings</span>
+    </button>
+    <button class="tab-button" data-tab="about">
+      <span class="tab-icon">ℹ️</span>
+      <span data-i18n="tab_about">About</span>
+    </button>
+  </nav>
+
+  <!-- Floating action button -->
+  <button id="fab-add" aria-label="Add item">+</button>
+
+  <!-- Item card template -->
   <template id="item-card-template">
-    <article class="item-card">
+    <article class="item-card card">
       <div class="item-image-wrapper">
         <img class="item-image" alt="" />
       </div>
@@ -164,7 +202,7 @@
         <p class="item-meta"></p>
       </div>
       <div class="item-actions">
-        <button class="small" data-action="edit" data-i18n="btn_edit">Edit</button>
+        <button class="small secondary" data-action="edit" data-i18n="btn_edit">Edit</button>
         <button class="small danger" data-action="delete" data-i18n="btn_delete">Delete</button>
       </div>
     </article>
