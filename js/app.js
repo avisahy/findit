@@ -183,13 +183,13 @@ function initDataActions() {
 
 function initRipple() {
   document.addEventListener("click", e => {
-    if (e.target.tagName === "BUTTON") {
-      const rect = e.target.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      e.target.style.setProperty("--x", `${x}px`);
-      e.target.style.setProperty("--y", `${y}px`);
-    }
+    const target = e.target.closest("button.icon-button, button.btn");
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    target.style.setProperty("--x", `${x}px`);
+    target.style.setProperty("--y", `${y}px`);
   });
 }
 
