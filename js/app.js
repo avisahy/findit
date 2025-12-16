@@ -1,4 +1,14 @@
 const THEME_STORAGE_KEY = "findit-theme";
+let deferredPrompt = null;
+
+function updateThemeIcon() {
+  const btnTheme = document.getElementById("btn-theme");
+  const isDark = document.documentElement.classList.contains("dark");
+  if (btnTheme) {
+    btnTheme.textContent = isDark ? "☀️" : "🌙";
+    btnTheme.setAttribute("title", isDark ? "Light mode" : "Dark mode");
+  }
+}
 
 function initTheme() {
   const saved = localStorage.getItem(THEME_STORAGE_KEY);
@@ -23,6 +33,7 @@ function applyTheme(theme) {
     document.documentElement.classList.remove("dark");
   }
   localStorage.setItem(THEME_STORAGE_KEY, theme);
+  updateThemeIcon();
 }
 
 function readFileAsDataUrl(file) {
@@ -41,10 +52,10 @@ function initTabs() {
     });
   });
 
-  const fab = document.getElementById("fab-add");
-  if (fab) {
-    fab.addEventListener("click", () => {
-      switchTab("add");
+  const btnHome = document.getElementById("btn-home");
+  if (btnHome) {
+    btnHome.addEventListener("click", () => {
+      switchTab("catalog");
     });
   }
 }
@@ -52,14 +63,19 @@ function initTabs() {
 function initLanguageSelector() {
   const select = document.getElementById("language-select");
   if (!select) return;
-  select.addEventListener("change", () => {
-    loadLanguage(select.value);
+  select.addEventListener("change", async () => {
+    await loadLanguage(select.value);
+    // Re-translate all existing cards after language change
+    document.querySelectorAll(".item-card").forEach(card => {
+      translateDynamicCardButtons(card);
+    });
   });
 }
 
 function initForm() {
   const form = document.getElementById("item-form");
   const resetBtn = document.getElementById("btn-reset-form");
+  const cancelBtn = document.getElementById("btn-cancel");
   const fileInput = document.getElementById("item-image");
   const previewImg = document.getElementById("preview-img");
 
@@ -125,6 +141,14 @@ function initForm() {
   });
 
   resetBtn.addEventListener("click", () => clearForm());
+  cancelBtn.addEventListener("click", () => {
+    clearForm();
+    switchTab("catalog");
+  });
+
+  // Left/right navigation while editing
+  document.getElementById("btn-prev").addEventListener("click", () => navigateEdit("prev"));
+  document.getElementById("btn-next").addEventListener("click", () => navigateEdit("next"));
 }
 
 function initSearch() {
@@ -138,6 +162,9 @@ function initDataActions() {
   const exportBtn = document.getElementById("btn-export");
   const importInput = document.getElementById("import-file");
   const deleteAllBtn = document.getElementById("btn-delete-all");
+  const installBtn = document.getElementById("btn-install");
+  const iosBtn = document.getElementById("btn-ios-instructions");
+  const iosPanel = document.getElementById("ios-instructions");
 
   exportBtn.addEventListener("click", async () => {
     try {
@@ -179,6 +206,27 @@ function initDataActions() {
     await dbClearAll();
     refreshItems();
   });
+
+  // Install prompts
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      console.log("Install choice:", choice);
+    } else {
+      alert("On iOS: use 'Add to Home Screen' from Safari. On Desktop/Android: ensure you see the install icon.");
+    }
+  });
+
+  iosBtn.addEventListener("click", () => {
+    iosPanel.style.display = iosPanel.style.display === "none" ? "block" : "none";
+  });
 }
 
 function initRipple() {
@@ -201,7 +249,7 @@ function registerServiceWorker() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   initTheme();
   initTabs();
   initLanguage();
@@ -210,6 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSearch();
   initDataActions();
   initRipple();
-  refreshItems();
+  bindImageModalEvents();
+  await refreshItems();
   registerServiceWorker();
 });
