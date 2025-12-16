@@ -262,3 +262,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   await refreshItems();
   registerServiceWorker();
 });
+
+function updateLanguageSelectDisplay() {
+  const select = document.getElementById("language-select");
+  const current = select.value;
+  const option = select.querySelector(`option[value="${current}"]`);
+  if (option) {
+    // Replace visible text with short code
+    select.options[select.selectedIndex].textContent = option.dataset.short;
+  }
+}
+
+function initLanguageSelector() {
+  const select = document.getElementById("language-select");
+  if (!select) return;
+
+  // On change: load language and reset display
+  select.addEventListener("change", async () => {
+    await loadLanguage(select.value);
+    updateLanguageSelectDisplay();
+    // retranslate dynamic buttons
+    document.querySelectorAll(".item-card").forEach(card => {
+      translateDynamicCardButtons(card);
+    });
+  });
+
+  // On page load: set correct short label
+  updateLanguageSelectDisplay();
+}
