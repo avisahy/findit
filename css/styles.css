@@ -597,3 +597,15 @@ html[dir="ltr"] #btn-next::before { content: "⟶"; }
 html[dir="rtl"] #btn-prev::before { content: "⟶"; }
 html[dir="rtl"] #btn-next::before { content: "⟵"; }
 
+
+#language-select option {
+  /* full text shown in dropdown */
+}
+
+#language-select:lang(en) {
+  font-family: inherit;
+}
+
+#language-select:lang(he) {
+  font-family: inherit;
+}
