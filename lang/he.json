@@ -8,7 +8,7 @@
   "add_hint": "צור פריט חדש עם כותרת, תמונה ותגיות.",
   "search_placeholder": "חיפוש פריטים...",
   "empty_title": "אין פריטים עדיין",
-  "empty_message": "התחל על ידי הוספת הפריט הראשון עם כפתור +.",
+  "empty_message": "התחל על ידי הוספת הפריט הראשון מהלשונית 'הוספה'.",
   "field_title": "כותרת",
   "field_description": "תיאור",
   "field_category": "קטגוריה",
@@ -18,6 +18,7 @@
   "btn_reset": "איפוס",
   "btn_edit": "עריכה",
   "btn_delete": "מחיקה",
+  "btn_cancel": "ביטול",
   "btn_export": "ייצוא נתונים",
   "btn_import": "ייבוא נתונים",
   "btn_delete_all": "מחיקת כל הנתונים",
@@ -27,6 +28,10 @@
   "settings_language_hint": "בחר את השפה המועדפת מהתפריט למעלה.",
   "settings_data": "נתונים",
   "settings_delete_warning": "פעולה זו קבועה ולא ניתן לבטלה.",
+  "install_title": "התקנת האפליקציה",
+  "btn_install": "התקנה (דסקטופ/אנדרואיד)",
+  "btn_ios_install": "איך מתקינים ב-iOS",
+  "ios_steps": "בספארי ב-iOS: לחץ על שיתוף ולאחר מכן \"הוסף למסך הבית\".",
   "about_title": "אודות FindIt",
   "about_body": "FindIt הוא קטלוג אישי חמים ופשוט לניהול פריטים עם תמונות, כותרת ותגיות. האפליקציה עובדת גם ללא חיבור וניתנת להתקנה במכשיר.",
   "about_repo_label": "פרויקט GitHub:",
@@ -36,3 +41,4 @@
   "import_success": "הנתונים יובאו בהצלחה.",
   "export_filename": "findit-data.json"
 }
+
