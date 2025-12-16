@@ -7,6 +7,44 @@ function switchTab(tabName) {
   });
 }
 
+function openImageModal(src, alt) {
+  const modal = document.getElementById("image-modal");
+  const img = document.getElementById("image-modal-img");
+  img.src = src;
+  img.alt = alt || "";
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeImageModal() {
+  const modal = document.getElementById("image-modal");
+  const img = document.getElementById("image-modal-img");
+  img.src = "";
+  img.alt = "";
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function bindImageModalEvents() {
+  const modal = document.getElementById("image-modal");
+  const backdrop = modal.querySelector(".image-modal-backdrop");
+  const closeBtn = document.getElementById("image-modal-close");
+
+  backdrop.addEventListener("click", closeImageModal);
+  closeBtn.addEventListener("click", closeImageModal);
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeImageModal();
+  });
+
+  const preview = document.getElementById("preview-img");
+  if (preview) {
+    preview.addEventListener("click", () => {
+      if (!preview.src) return;
+      openImageModal(preview.src, "preview");
+    });
+  }
+}
+
 function createItemCard(item) {
   const template = document.getElementById("item-card-template");
   const fragment = template.content.cloneNode(true);
@@ -22,6 +60,10 @@ function createItemCard(item) {
     imgEl.src = item.imageDataUrl;
     imgEl.alt = item.title || "";
     imgEl.style.display = "block";
+
+    imgEl.addEventListener("click", () => {
+      openImageModal(item.imageDataUrl, item.title);
+    });
   } else {
     imgEl.style.display = "none";
   }
@@ -48,6 +90,9 @@ function createItemCard(item) {
 
   card.dataset.id = item.id;
 
+  // Translate buttons for current language
+  translateDynamicCardButtons(card);
+
   card.querySelector('[data-action="edit"]').addEventListener("click", () => {
     fillFormForEdit(item);
     switchTab("add");
@@ -65,6 +110,7 @@ function createItemCard(item) {
 
 function clearForm() {
   document.getElementById("item-id").value = "";
+  document.getElementById("item-index").value = "";
   document.getElementById("item-title").value = "";
   document.getElementById("item-description").value = "";
   document.getElementById("item-category").value = "";
@@ -77,13 +123,15 @@ function clearForm() {
   }
 }
 
-function fillFormForEdit(item) {
+function fillFormForEdit(item, index = null) {
   document.getElementById("item-id").value = item.id || "";
+  document.getElementById("item-index").value = index !== null ? index : "";
   document.getElementById("item-title").value = item.title || "";
   document.getElementById("item-description").value = item.description || "";
   document.getElementById("item-category").value = item.category || "";
   document.getElementById("item-tags").value = (item.tags || []).join(", ");
   document.getElementById("item-image").value = "";
+
   const preview = document.getElementById("preview-img");
   if (preview && item.imageDataUrl) {
     preview.src = item.imageDataUrl;
@@ -120,7 +168,30 @@ async function refreshItems() {
   }
 
   emptyState.style.display = "none";
-  filtered.forEach(item => {
+  filtered.forEach((item, idx) => {
     listEl.appendChild(createItemCard(item));
   });
+}
+
+/* Navigation through items when editing */
+async function navigateEdit(direction) {
+  const items = await dbGetAllItems();
+  if (!items.length) return;
+
+  const currentIndexRaw = document.getElementById("item-index").value;
+  let currentIndex = currentIndexRaw === "" ? -1 : Number(currentIndexRaw);
+
+  if (currentIndex === -1) {
+    // If editing not started, start from first/last depending on direction
+    currentIndex = direction === "next" ? 0 : items.length - 1;
+  } else {
+    currentIndex =
+      direction === "next"
+        ? (currentIndex + 1) % items.length
+        : (currentIndex - 1 + items.length) % items.length;
+  }
+
+  const item = items[currentIndex];
+  fillFormForEdit(item, currentIndex);
+  switchTab("add");
 }
