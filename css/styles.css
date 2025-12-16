@@ -1,5 +1,5 @@
 /* ---------------------------------------------
-   FindIt - Soft Sunset Neo-Neumorphism UI
+   FindIt - Soft Sunset Neo-Neumorphism UI (Fixed)
 --------------------------------------------- */
 
 :root {
@@ -17,6 +17,7 @@
   --radius-lg: 18px;
   --radius-md: 14px;
   --radius-pill: 999px;
+  --content-padding: 1rem;
 }
 
 :root.dark {
@@ -31,10 +32,10 @@
   --border-subtle: #3b3028;
   --shadow-light: -4px -4px 10px rgba(80, 65, 55, 0.7);
   --shadow-dark: 10px 10px 22px rgba(0, 0, 0, 0.85);
+  --content-padding: 1rem;
 }
 
 /* Smooth transitions */
-
 *,
 *::before,
 *::after {
@@ -67,7 +68,6 @@ body {
 }
 
 /* Header */
-
 .app-header {
   position: sticky;
   top: 0;
@@ -87,6 +87,13 @@ body {
   font-size: 1.1rem;
   text-transform: uppercase;
   color: var(--text);
+}
+
+.button-like-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 }
 
 .header-actions {
@@ -115,7 +122,6 @@ select {
 }
 
 /* Main layout */
-
 .app-main {
   flex: 1;
   padding: 0.9rem 1rem 4.5rem;
@@ -140,7 +146,6 @@ select {
 }
 
 /* Cards */
-
 .card {
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
@@ -151,8 +156,11 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Section headings */
+.with-padding {
+  padding: var(--content-padding);
+}
 
+/* Section headings */
 .section-title {
   margin: 0 0 0.15rem;
   font-size: 1.05rem;
@@ -164,13 +172,15 @@ select {
   color: var(--text-soft);
 }
 
-/* Toolbar, search */
-
 .toolbar {
-  padding: 0.8rem 0.9rem 0.9rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.3rem;
 }
 
+.toolbar.tight {
+  margin-bottom: 0.2rem;
+}
+
+/* Inputs */
 input[type="search"],
 input[type="text"],
 input[type="file"],
@@ -186,10 +196,8 @@ textarea {
 }
 
 /* Items grid */
-
 .items-grid {
   display: grid;
-  padding: 0.7rem 0.9rem 0.9rem;
   gap: 0.8rem;
 }
 
@@ -200,9 +208,8 @@ textarea {
 }
 
 /* Empty state */
-
 .empty-state {
-  padding: 1.2rem 1rem 1.4rem;
+  padding: 1.2rem 0 1.4rem;
   text-align: center;
   color: var(--text-soft);
   display: none;
@@ -225,7 +232,6 @@ textarea {
 }
 
 /* Item cards */
-
 .item-card {
   padding: 0;
   display: flex;
@@ -250,6 +256,7 @@ textarea {
   object-fit: cover;
   display: block;
   transform: scale(1.01);
+  cursor: zoom-in;
 }
 
 .item-content {
@@ -300,7 +307,6 @@ textarea {
 }
 
 /* Item actions */
-
 .item-actions {
   display: flex;
   justify-content: flex-end;
@@ -309,9 +315,7 @@ textarea {
 }
 
 /* Form */
-
 .form-grid {
-  padding: 0.8rem 0.9rem 0.9rem;
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.7rem;
@@ -332,7 +336,6 @@ textarea {
 }
 
 /* Labels */
-
 label span {
   display: block;
   margin-bottom: 0.2rem;
@@ -340,34 +343,38 @@ label span {
   color: var(--text-soft);
 }
 
-/* File label */
-
+/* File */
 .file-label input[type="file"] {
   padding: 0.5rem 0.8rem;
 }
 
 /* Preview image */
-
 .preview-img {
   width: 100%;
   max-height: 220px;
   object-fit: cover;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-light), var(--shadow-dark);
-  margin: 0.9rem 0 0.2rem;
+  margin: 0.9rem 0 0.6rem;
+  cursor: zoom-in;
 }
 
 /* Form actions */
-
 .form-actions {
   grid-column: 1 / -1;
   display: flex;
+  justify-content: space-between;
   gap: 0.5rem;
   margin-top: 0.3rem;
 }
 
-/* Buttons */
+.form-nav-left, .form-nav-right {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
 
+/* Buttons */
 .btn {
   font-family: inherit;
   font-size: 0.86rem;
@@ -406,7 +413,6 @@ label span {
 }
 
 /* Press / hover effects */
-
 .btn:hover,
 .icon-button:hover,
 .item-card:hover {
@@ -425,8 +431,7 @@ label span {
     inset 4px 4px 12px rgba(171, 147, 126, 0.7);
 }
 
-/* Ripple (using CSS variable from JS) */
-
+/* Ripple */
 .btn::after,
 .icon-button::after {
   content: "";
@@ -450,9 +455,8 @@ label span {
 }
 
 /* Settings */
-
 .settings-section {
-  padding: 0.7rem 0.9rem 0;
+  margin-top: 0.6rem;
 }
 
 .settings-section h3 {
@@ -479,8 +483,20 @@ label span {
   margin-top: 0.25rem;
 }
 
-/* Bottom navigation */
+/* Install */
+.install-section .install-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0 0.4rem;
+}
 
+.ios-instructions {
+  font-size: 0.86rem;
+  color: var(--text-soft);
+}
+
+/* Bottom navigation */
 .tab-bar {
   position: fixed;
   bottom: 0.6rem;
@@ -519,36 +535,41 @@ label span {
   font-size: 1.1rem;
 }
 
-/* FAB */
-
-#fab-add {
+/* Image modal */
+.image-modal {
   position: fixed;
-  bottom: 3.8rem;
-  right: 1.3rem;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: none;
-  background: radial-gradient(circle at top, #ffe9c7 0, #ffbf7c 70%, #f7a25a 100%);
-  color: #4a2b16;
-  font-size: 2rem;
-  display: flex;
-  justify-content: center;
+  inset: 0;
+  display: none;
   align-items: center;
-  box-shadow:
-    0 15px 30px rgba(194, 132, 68, 0.55),
-    var(--shadow-light);
-  cursor: pointer;
-  z-index: 30;
+  justify-content: center;
+  z-index: 100;
 }
 
-:root.dark #fab-add {
-  background: radial-gradient(circle at top, #f9c890 0, #f39a55 70%, #dc7a33 100%);
-  color: #2b1308;
+.image-modal.open {
+  display: flex;
 }
 
-/* Focus states */
+.image-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+}
 
+.image-modal img {
+  position: relative;
+  max-width: 94vw;
+  max-height: 86vh;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-light), var(--shadow-dark);
+}
+
+#image-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+/* Focus */
 button:focus-visible,
 select:focus-visible,
 input:focus-visible,
@@ -558,28 +579,12 @@ textarea:focus-visible {
 }
 
 /* Animations */
-
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* RTL tweaks */
-
-html[dir="rtl"] body {
-  direction: rtl;
-}
-
-html[dir="rtl"] .item-header-line {
-  flex-direction: row-reverse;
-}
-
-html[dir="rtl"] .item-actions {
-  justify-content: flex-start;
-}
+html[dir="rtl"] body { direction: rtl; }
+html[dir="rtl"] .item-header-line { flex-direction: row-reverse; }
+html[dir="rtl"] .item-actions { justify-content: flex-start; }
