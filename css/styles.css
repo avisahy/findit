@@ -588,3 +588,12 @@ textarea:focus-visible {
 html[dir="rtl"] body { direction: rtl; }
 html[dir="rtl"] .item-header-line { flex-direction: row-reverse; }
 html[dir="rtl"] .item-actions { justify-content: flex-start; }
+
+/* LTR (English) */
+html[dir="ltr"] #btn-prev::before { content: "⟵"; }
+html[dir="ltr"] #btn-next::before { content: "⟶"; }
+
+/* RTL (Hebrew) */
+html[dir="rtl"] #btn-prev::before { content: "⟶"; }
+html[dir="rtl"] #btn-next::before { content: "⟵"; }
+
