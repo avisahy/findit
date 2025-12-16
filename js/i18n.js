@@ -65,3 +65,25 @@ function initLanguage() {
   if (select) select.value = lang;
   loadLanguage(lang);
 }
+
+function initLanguageSelector() {
+  const select = document.getElementById("language-select");
+  if (!select) return;
+
+  // Restore saved language
+  const saved = localStorage.getItem("findit-language") || "en";
+  select.value = saved;
+  loadLanguage(saved);
+
+  // Handle changes
+  select.addEventListener("change", async () => {
+    const lang = select.value;
+    await loadLanguage(lang);
+    localStorage.setItem("findit-language", lang);
+
+    // Re-translate dynamic card buttons
+    document.querySelectorAll(".item-card").forEach(card => {
+      translateDynamicCardButtons(card);
+    });
+  });
+}
