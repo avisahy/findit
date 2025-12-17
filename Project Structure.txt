@@ -1,0 +1,17 @@
+findit/
+├── index.html              # Main entry point (UI, catalog grid, navigation)
+├── manifest.json           # PWA metadata (name, icons, theme colors, install support)
+├── service-worker.js       # Offline caching, background sync, installability
+├── /js
+│   ├── app.js              # Core logic: catalog CRUD, gestures, export/import, reset
+│   ├── db.js               # IndexedDB/local DB wrapper for unlimited storage
+│   ├── ui.js               # UI rendering, dark mode toggle, swipe navigation, previews
+│   └── i18n.js             # Language switching logic (English/Hebrew)
+├── /css
+│   └── style.css           # Styles: responsive layout, dark/light mode, 3D GUI
+├── /img
+│   ├── icon-192.png        # PWA icon (192px)
+│   └── icon-512.png        # PWA icon (512px)
+├── /lang
+│   ├── en.json             # English translations
+│   └── he.json             # Hebrew translations
