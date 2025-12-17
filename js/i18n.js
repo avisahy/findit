@@ -1,32 +1,47 @@
-// findit/js/i18n.js
-export const I18n = (() => {
-  let dict = {};
-  let current = 'en';
+// Basic i18n loader with dir switching for Hebrew
 
-  async function load(lang) {
-    const res = await fetch(`lang/${lang}.json`);
-    dict = await res.json();
-    current = lang;
-    applyToDocument();
-  }
+const LANG_KEY = 'findit-lang';
+let currentLang = localStorage.getItem(LANG_KEY) || 'en';
+let messages = {};
 
-  function t(key, fallback = '') {
-    return dict[key] ?? fallback ?? key;
-  }
+async function loadLang(lang) {
+  const res = await fetch(`./lang/${lang}.json`);
+  messages = await res.json();
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, currentLang);
+  const dir = lang === 'he' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = dir;
+  applyTranslations();
+}
 
-  function applyToDocument() {
-    document.documentElement.lang = current;
-    document.documentElement.dir = current === 'he' ? 'rtl' : 'ltr';
-    document.querySelectorAll('[data-i18n]').forEach((el) => {
-      const key = el.getAttribute('data-i18n');
-      el.textContent = t(key, el.textContent);
-    });
-  }
+function t(key) {
+  return messages[key] || key;
+}
 
-  function applyPlaceholder(el, key) {
-    if (!el) return;
-    el.setAttribute('placeholder', t(key, el.getAttribute('placeholder')));
-  }
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    const text = t(key);
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.setAttribute('placeholder', text);
+    } else {
+      el.textContent = text;
+    }
+  });
+}
 
-  return { load, t, applyToDocument, applyPlaceholder, get current() { return current; } };
-})();
+export async function i18nInit() {
+  await loadLang(currentLang);
+  const langSelect = document.getElementById('langSelect');
+  const settingsSelect = document.getElementById('settingsLangSelect');
+  if (langSelect) langSelect.value = currentLang;
+  if (settingsSelect) settingsSelect.value = currentLang;
+
+  langSelect?.addEventListener('change', (e) => loadLang(e.target.value));
+  settingsSelect?.addEventListener('change', (e) => loadLang(e.target.value));
+}
+
+export function i18nT(key) {
+  return t(key);
+}
