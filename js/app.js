@@ -1,265 +1,227 @@
+// findit/js/app.js
+import { DB } from './db.js';
+import { I18n } from './i18n.js';
+import { UI } from './ui.js';
 
-const THEME_STORAGE_KEY = "findit-theme";
-let deferredPrompt = null;
+let state = {
+  items: [],
+  theme: 'dark',
+  lang: 'en',
+  cursor: 0 // for swipe navigation
+};
 
-function updateThemeIcon() {
-  const btnTheme = document.getElementById("btn-theme");
-  const isDark = document.documentElement.classList.contains("dark");
-  if (btnTheme) {
-    btnTheme.textContent = isDark ? "☀️" : "🌙";
-    btnTheme.setAttribute("title", isDark ? "Light mode" : "Dark mode");
-  }
+const els = {
+  exportBtn: document.getElementById('exportBtn'),
+  importInput: document.getElementById('importInput'),
+  resetBtn: document.getElementById('resetBtn'),
+  itemForm: document.getElementById('itemForm'),
+  itemId: document.getElementById('itemId'),
+  itemTitle: document.getElementById('itemTitle'),
+  itemDesc: document.getElementById('itemDesc'),
+  itemImage: document.getElementById('itemImage'),
+  itemCamera: document.getElementById('itemCamera'),
+  imagePreview: document.getElementById('imagePreview'),
+  cancelEdit: document.getElementById('cancelEdit'),
+  settingsExport: document.getElementById('settingsExport'),
+  settingsImport: document.getElementById('settingsImport'),
+  settingsReset: document.getElementById('settingsReset')
+};
+
+async function init() {
+  // Load meta (theme/lang)
+  state.theme = (await DB.getMeta('theme')) || 'dark';
+  state.lang = (await DB.getMeta('lang')) || 'en';
+
+  UI.applyTheme(state.theme);
+  const langControl = UI.initLang(async (val) => {
+    state.lang = val;
+    await DB.setMeta('lang', val);
+    await I18n.load(val);
+    UI.updateTexts();
+  });
+
+  await I18n.load(state.lang);
+  langControl.set(state.lang);
+
+  UI.initTabs();
+  UI.initModal();
+  UI.initNavigation();
+  UI.setYear();
+  UI.initInstall();
+
+  UI.initTheme(async () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    UI.applyTheme(state.theme);
+    await DB.setMeta('theme', state.theme);
+  });
+
+  UI.initSearch(() => UI.renderGrid(state.items));
+
+  await reloadItems();
+  bindEvents();
 }
 
-function initTheme() {
-  const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  const prefersDark =
-    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const theme = saved || (prefersDark ? "dark" : "light");
-  applyTheme(theme);
-
-  const btnTheme = document.getElementById("btn-theme");
-  if (btnTheme) {
-    btnTheme.addEventListener("click", () => {
-      const isDark = document.documentElement.classList.contains("dark");
-      applyTheme(isDark ? "light" : "dark");
-    });
-  }
+async function reloadItems() {
+  state.items = await DB.getAllItems();
+  state.items.sort((a, b) => (b.id || 0) - (a.id || 0));
+  UI.renderGrid(state.items);
 }
 
-function applyTheme(theme) {
-  if (theme === "dark") {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
-  localStorage.setItem(THEME_STORAGE_KEY, theme);
-  updateThemeIcon();
-}
-
-function readFileAsDataUrl(file) {
+function dataUrlFromFile(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = reject;
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
 }
 
-function initTabs() {
-  document.querySelectorAll(".tab-button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      switchTab(btn.dataset.tab);
-    });
-  });
-
-  const btnHome = document.getElementById("btn-home");
-  if (btnHome) {
-    btnHome.addEventListener("click", () => {
-      switchTab("catalog");
-    });
-  }
+function setPreview(src) {
+  els.imagePreview.innerHTML = src ? `<img src="${src}" alt="preview" class="thumb" />` : '';
 }
 
-function initLanguageSelector() {
-  const select = document.getElementById("language-select");
-  if (!select) return;
-  select.addEventListener("change", async () => {
-    await loadLanguage(select.value);
-    // Re-translate all existing cards after language change
-    document.querySelectorAll(".item-card").forEach(card => {
-      translateDynamicCardButtons(card);
-    });
-  });
+function clearForm() {
+  els.itemId.value = '';
+  els.itemTitle.value = '';
+  els.itemDesc.value = '';
+  els.itemImage.value = '';
+  els.itemCamera.value = '';
+  setPreview('');
 }
 
-function initForm() {
-  const form = document.getElementById("item-form");
-  const resetBtn = document.getElementById("btn-reset-form");
-  const cancelBtn = document.getElementById("btn-cancel");
-  const fileInput = document.getElementById("item-image");
-  const previewImg = document.getElementById("preview-img");
+function bindEvents() {
+  // Image inputs
+  els.itemImage.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await dataUrlFromFile(file);
+    setPreview(url);
+    els.itemImage.dataset.url = url;
+  });
+  els.itemCamera.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await dataUrlFromFile(file);
+    setPreview(url);
+    els.itemCamera.dataset.url = url;
+  });
 
-  if (fileInput && previewImg) {
-    fileInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) {
-        previewImg.src = "";
-        previewImg.style.display = "none";
-        return;
-      }
-      const url = URL.createObjectURL(file);
-      previewImg.src = url;
-      previewImg.style.display = "block";
-    });
-  }
-
-  form.addEventListener("submit", async e => {
+  // Save item
+  els.itemForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const id = form.querySelector("#item-id").value || null;
-    const title = form.querySelector("#item-title").value.trim();
-    const description = form.querySelector("#item-description").value.trim();
-    const category = form.querySelector("#item-category").value.trim();
-    const tagsRaw = form.querySelector("#item-tags").value.trim();
-    const file = fileInput.files[0];
-
-    let imageDataUrl = null;
-    if (file) {
-      try {
-        imageDataUrl = await readFileAsDataUrl(file);
-      } catch (err) {
-        console.error("Failed to read image file", err);
-      }
-    }
-
-    const tags = tagsRaw
-      ? tagsRaw
-          .split(",")
-          .map(t => t.trim())
-          .filter(Boolean)
-      : [];
-
-    const item = { title, description, category, tags, imageDataUrl };
+    const id = els.itemId.value ? Number(els.itemId.value) : undefined;
+    const image = els.itemCamera.dataset.url || els.itemImage.dataset.url || null;
+    const item = {
+      id,
+      title: els.itemTitle.value.trim(),
+      description: els.itemDesc.value.trim(),
+      image
+    };
+    if (!item.title) return;
 
     if (id) {
-      item.id = Number(id);
-      if (!file) {
-        const all = await dbGetAllItems();
-        const existing = all.find(x => x.id === item.id);
-        if (existing && existing.imageDataUrl) {
-          item.imageDataUrl = existing.imageDataUrl;
-        }
-      }
-      await dbUpdateItem(item);
+      await DB.updateItem(item);
     } else {
-      await dbAddItem(item);
+      delete item.id;
+      const newId = await DB.addItem(item);
+      item.id = newId;
     }
 
     clearForm();
-    switchTab("catalog");
-    refreshItems();
+    await reloadItems();
+    // Switch back to catalog
+    document.querySelector('[data-tab="catalog"]').click();
   });
 
-  resetBtn.addEventListener("click", () => clearForm());
-  cancelBtn.addEventListener("click", () => {
+  // Cancel edit
+  els.cancelEdit.addEventListener('click', () => clearForm());
+
+  // Export
+  const exportHandler = async () => {
+    const items = await DB.getAllItems();
+    const blob = new Blob([JSON.stringify({ items }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `findit-export-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  els.exportBtn.addEventListener('click', exportHandler);
+  els.settingsExport.addEventListener('click', exportHandler);
+
+  // Import
+  const importHandler = async (file) => {
+    const text = await file.text();
+    const json = JSON.parse(text);
+    const items = Array.isArray(json.items) ? json.items : [];
+    for (const it of items) {
+      // Strip id to avoid clashes; let DB assign
+      const { title, description, image } = it;
+      await DB.addItem({ title, description, image });
+    }
+    await reloadItems();
+  };
+  els.importInput.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (file) await importHandler(file);
+    e.target.value = '';
+  });
+  els.settingsImport.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (file) await importHandler(file);
+    e.target.value = '';
+  });
+
+  // Reset
+  const resetHandler = async () => {
+    const ok = confirm('Delete all data? This cannot be undone.');
+    if (!ok) return;
+    await DB.clearAll();
+    await reloadItems();
     clearForm();
-    switchTab("catalog");
+    // Reset meta defaults
+    state.theme = 'dark';
+    state.lang = 'en';
+    await DB.setMeta('theme', state.theme);
+    await DB.setMeta('lang', state.lang);
+    UI.applyTheme(state.theme);
+    await I18n.load(state.lang);
+    UI.updateTexts();
+  };
+  els.resetBtn.addEventListener('click', resetHandler);
+  els.settingsReset.addEventListener('click', resetHandler);
+
+  // Edit/delete from UI custom events
+  window.addEventListener('ui:edit', (ev) => {
+    const it = ev.detail;
+    document.querySelector('[data-tab="addEdit"]').click();
+    els.itemId.value = it.id;
+    els.itemTitle.value = it.title || '';
+    els.itemDesc.value = it.description || '';
+    setPreview(it.image || '');
+    els.itemImage.dataset.url = it.image || '';
+    els.itemCamera.dataset.url = '';
+  });
+  window.addEventListener('ui:delete', async (ev) => {
+    const id = ev.detail;
+    await DB.deleteItem(id);
+    await reloadItems();
   });
 
-  // Left/right navigation while editing
-  document.getElementById("btn-prev").addEventListener("click", () => navigateEdit("prev"));
-  document.getElementById("btn-next").addEventListener("click", () => navigateEdit("next"));
+  // Swipe navigation: move cursor and open image
+  window.addEventListener('ui:swipeRight', () => navigate(-1));
+  window.addEventListener('ui:swipeLeft', () => navigate(+1));
 }
 
-function initSearch() {
-  const searchInput = document.getElementById("search-input");
-  searchInput.addEventListener("input", () => {
-    refreshItems();
-  });
+function navigate(delta) {
+  if (state.items.length === 0) return;
+  state.cursor = (state.cursor + delta + state.items.length) % state.items.length;
+  const item = state.items[state.cursor];
+  // open preview
+  const modal = document.getElementById('imageModal');
+  const img = document.getElementById('modalImage');
+  img.src = item.image || '';
+  modal.setAttribute('aria-hidden', 'false');
 }
 
-function initDataActions() {
-  const exportBtn = document.getElementById("btn-export");
-  const importInput = document.getElementById("import-file");
-  const deleteAllBtn = document.getElementById("btn-delete-all");
-  const installBtn = document.getElementById("btn-install");
-  const iosBtn = document.getElementById("btn-ios-instructions");
-  const iosPanel = document.getElementById("ios-instructions");
-
-  exportBtn.addEventListener("click", async () => {
-    try {
-      const data = await dbExportData();
-      const json = JSON.stringify(data, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = t("export_filename", "findit-data.json");
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export failed", err);
-    }
-  });
-
-  importInput.addEventListener("change", async () => {
-    const file = importInput.files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      await dbImportData(data);
-      alert(t("import_success", "Data imported successfully."));
-      refreshItems();
-    } catch (err) {
-      console.error("Import failed", err);
-      alert(t("import_invalid", "Invalid import file."));
-    } finally {
-      importInput.value = "";
-    }
-  });
-
-  deleteAllBtn.addEventListener("click", async () => {
-    if (!window.confirm(t("confirm_delete_all"))) return;
-    await dbClearAll();
-    refreshItems();
-  });
-
-  // Install prompts
-  window.addEventListener("beforeinstallprompt", e => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
-  installBtn.addEventListener("click", async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      console.log("Install choice:", choice);
-    } else {
-      alert("On iOS: use 'Add to Home Screen' from Safari. On Desktop/Android: ensure you see the install icon.");
-    }
-  });
-
-  iosBtn.addEventListener("click", () => {
-    iosPanel.style.display = iosPanel.style.display === "none" ? "block" : "none";
-  });
-}
-
-function initRipple() {
-  document.addEventListener("click", e => {
-    const target = e.target.closest("button.icon-button, button.btn");
-    if (!target) return;
-    const rect = target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    target.style.setProperty("--x", `${x}px`);
-    target.style.setProperty("--y", `${y}px`);
-  });
-}
-
-function registerServiceWorker() {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("service-worker.js")
-      .catch(err => console.error("Service worker registration failed", err));
-  }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  initTheme();
-  initTabs();
-  initLanguage();
-  initLanguageSelector();
-  initForm();
-  initSearch();
-  initDataActions();
-  initRipple();
-  bindImageModalEvents();
-  await refreshItems();
-  registerServiceWorker();
-});
+window.addEventListener('DOMContentLoaded', init);
