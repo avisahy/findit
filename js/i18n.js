@@ -1,5 +1,4 @@
 const I18N_STORAGE_KEY = "findit-language";
-
 let currentLang = "en";
 const translations = {};
 
@@ -27,12 +26,10 @@ function t(key, fallback) {
 
 function applyLanguage() {
   const dict = translations[currentLang] || {};
-
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     if (dict[key]) el.textContent = dict[key];
   });
-
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (dict[key]) el.setAttribute("placeholder", dict[key]);
@@ -46,12 +43,10 @@ function applyLanguage() {
     html.setAttribute("lang", "en");
     html.setAttribute("dir", "ltr");
   }
-
   localStorage.setItem(I18N_STORAGE_KEY, currentLang);
 }
 
 function translateDynamicCardButtons(cardEl) {
-  // Ensure Edit/Delete buttons follow current language after card creation
   const editEl = cardEl.querySelector('[data-action="edit"] [data-i18n="btn_edit"]');
   const delEl = cardEl.querySelector('[data-action="delete"] [data-i18n="btn_delete"]');
   if (editEl) editEl.textContent = t("btn_edit", editEl.textContent);
@@ -64,26 +59,4 @@ function initLanguage() {
   const select = document.getElementById("language-select");
   if (select) select.value = lang;
   loadLanguage(lang);
-}
-
-function initLanguageSelector() {
-  const select = document.getElementById("language-select");
-  if (!select) return;
-
-  // Restore saved language
-  const saved = localStorage.getItem("findit-language") || "en";
-  select.value = saved;
-  loadLanguage(saved);
-
-  // Handle changes
-  select.addEventListener("change", async () => {
-    const lang = select.value;
-    await loadLanguage(lang);
-    localStorage.setItem("findit-language", lang);
-
-    // Re-translate dynamic card buttons
-    document.querySelectorAll(".item-card").forEach(card => {
-      translateDynamicCardButtons(card);
-    });
-  });
 }
