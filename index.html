@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1E1A17" />
 
+  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="FindIt" />
@@ -24,7 +25,7 @@
   <header class="app-header">
     <button class="app-title button-like-link" id="btn-home" data-i18n="app_title">FindIt</button>
     <div class="header-actions">
-      <button id="btn-theme" class="icon-button" aria-label="Toggle theme">🌙</button>
+      <button id="btn-theme" class="icon-button" aria-label="Toggle theme" title="Toggle theme">🌙</button>
       <select id="language-select" aria-label="Language">
         <option value="en">English</option>
         <option value="he">עברית</option>
@@ -33,38 +34,52 @@
   </header>
 
   <main class="app-main">
-    <!-- Catalog -->
-    <section id="tab-catalog" class="tab-panel active">
+    <!-- Catalog tab -->
+    <section id="tab-catalog" class="tab-panel active" aria-labelledby="tab_catalog">
       <div class="panel-inner">
         <section class="card card-soft with-padding">
-          <h2 class="section-title" data-i18n="tab_catalog">Catalog</h2>
-          <input id="search-input" type="search" placeholder="Search..." data-i18n-placeholder="search_placeholder" />
-          <div id="items-list" class="items-grid"></div>
+          <div class="toolbar">
+            <h2 class="section-title" data-i18n="tab_catalog">Catalog</h2>
+            <p class="section-subtitle" data-i18n="catalog_hint">Browse and manage your saved items.</p>
+            <input
+              id="search-input"
+              type="search"
+              placeholder="Search items..."
+              data-i18n-placeholder="search_placeholder"
+              aria-label="Search items"
+            />
+          </div>
+
+          <div id="items-list" class="items-grid" aria-live="polite"></div>
+
           <div id="empty-state" class="empty-state">
-            <p data-i18n="empty_message">No items yet</p>
+            <div class="empty-icon">📦</div>
+            <p class="empty-title" data-i18n="empty_title">No items yet</p>
+            <p class="empty-text" data-i18n="empty_message">Start by adding your first item from the Add tab.</p>
           </div>
         </section>
       </div>
     </section>
 
-    <!-- Add/Edit -->
-    <section id="tab-add" class="tab-panel">
+    <!-- Add / Edit tab -->
+    <section id="tab-add" class="tab-panel" aria-labelledby="tab_add">
       <div class="panel-inner">
         <section class="card card-soft with-padding">
-          <h2 class="section-title" data-i18n="tab_add">Add</h2>
+          <div class="toolbar tight">
+            <h2 class="section-title" data-i18n="tab_add">Add</h2>
+            <p class="section-subtitle" data-i18n="add_hint">Capture a new item with title, image, and tags.</p>
+          </div>
+
           <img id="preview-img" class="preview-img" alt="" style="display:none;" />
-          <button type="button" id="btn-remove-picture" class="btn btn-danger small" style="display:none;">
-            <span data-i18n="btn_remove_picture">Remove picture</span>
-          </button>
 
           <form id="item-form" class="form-grid">
             <input type="hidden" id="item-id" />
             <input type="hidden" id="item-index" />
 
             <div class="form-group">
-              <label for="item-name">
-                <span data-i18n="field_name">Name</span>
-                <input id="item-name" type="text" required />
+              <label for="item-title">
+                <span data-i18n="field_title">Title</span>
+                <input id="item-title" type="text" required />
               </label>
             </div>
 
@@ -78,33 +93,39 @@
             <div class="form-group full-width">
               <label for="item-description">
                 <span data-i18n="field_description">Description</span>
-                <textarea id="item-description"></textarea>
+                <textarea id="item-description" rows="3"></textarea>
               </label>
             </div>
 
             <div class="form-group full-width">
-              <label for="item-location">
-                <span data-i18n="field_location">Location</span>
-                <input id="item-location" type="text" />
+              <label for="item-tags">
+                <span data-i18n="field_tags">Tags (comma separated)</span>
+                <input id="item-tags" type="text" />
               </label>
             </div>
 
             <div class="form-group full-width">
               <label for="item-image" class="file-label">
-                <span data-i18n="btn_choose_file">Choose file</span>
-                <input id="item-image" type="file" accept="image/*" capture="environment" />
+                <span data-i18n="field_image">Image</span>
+                <input id="item-image" type="file" accept="image/*" />
               </label>
             </div>
 
             <div class="form-actions">
               <div class="form-nav-left">
-                <button type="button" id="btn-prev" class="btn btn-soft small"></button>
-                <button type="button" id="btn-next" class="btn btn-soft small"></button>
+                <button type="button" id="btn-prev" class="btn btn-soft small" title="Previous"></button>
+                <button type="button" id="btn-next" class="btn btn-soft small" title="Next"></button>
               </div>
               <div class="form-nav-right">
-                <button type="button" id="btn-cancel" class="btn btn-secondary"><span data-i18n="btn_cancel">Cancel</span></button>
-                <button type="submit" class="btn btn-primary"><span data-i18n="btn_save">Save</span></button>
-                <button type="button" id="btn-reset-form" class="btn btn-soft"><span data-i18n="btn_reset">Reset</span></button>
+                <button type="button" id="btn-cancel" class="btn btn-secondary">
+                  <span data-i18n="btn_cancel">Cancel</span>
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <span data-i18n="btn_save">Save</span>
+                </button>
+                <button type="button" id="btn-reset-form" class="btn btn-soft">
+                  <span data-i18n="btn_reset">Reset</span>
+                </button>
               </div>
             </div>
           </form>
@@ -112,44 +133,111 @@
       </div>
     </section>
 
-    <!-- Settings -->
-    <section id="tab-settings" class="tab-panel">
+    <!-- Settings tab -->
+    <section id="tab-settings" class="tab-panel" aria-labelledby="tab_settings">
       <div class="panel-inner">
         <section class="card card-soft with-padding">
-          <h2 class="section-title" data-i18n="tab_settings">Settings</h2>
-          <button id="btn-export" class="btn btn-soft"><span data-i18n="btn_export">Export data</span></button>
-          <input id="import-file" type="file" accept="application/json" hidden />
-          <button id="btn-delete-all" class="btn btn-danger"><span data-i18n="btn_delete_all">Delete all data</span></button>
+          <div class="toolbar tight">
+            <h2 class="section-title" data-i18n="tab_settings">Settings</h2>
+          </div>
+
+          <div class="settings-section">
+            <h3 data-i18n="settings_appearance">Appearance</h3>
+            <p data-i18n="settings_theme_hint">Toggle sunset-themed dark or light mode using the moon icon in the header.</p>
+          </div>
+
+          <div class="settings-section">
+            <h3 data-i18n="settings_language">Language</h3>
+            <p data-i18n="settings_language_hint">Choose your preferred language from the selector above.</p>
+          </div>
+
+          <div class="settings-section">
+            <h3 data-i18n="settings_data">Data</h3>
+            <div class="settings-actions">
+              <button id="btn-export" class="btn btn-soft">
+                <span data-i18n="btn_export">Export data</span>
+              </button>
+              <label class="btn btn-soft button-like">
+                <span data-i18n="btn_import">Import data</span>
+                <input id="import-file" type="file" accept="application/json" hidden />
+              </label>
+            </div>
+            <button id="btn-delete-all" class="btn btn-danger">
+              <span data-i18n="btn_delete_all">Delete all data</span>
+            </button>
+            <p class="warning-text" data-i18n="settings_delete_warning">This action is permanent and cannot be undone.</p>
+          </div>
+
+          <div class="settings-section install-section">
+            <h3 data-i18n="install_title">Install app</h3>
+            <div class="install-actions">
+              <button id="btn-install" class="btn btn-primary">
+                <span data-i18n="btn_install">Install (Desktop/Android)</span>
+              </button>
+              <button id="btn-ios-instructions" class="btn btn-soft">
+                <span data-i18n="btn_ios_install">How to install on iOS</span>
+              </button>
+            </div>
+            <div id="ios-instructions" class="ios-instructions" style="display:none;">
+              <p data-i18n="ios_steps">
+                On iOS Safari: tap the Share icon, then "Add to Home Screen".
+              </p>
+            </div>
+          </div>
         </section>
       </div>
     </section>
 
-    <!-- About -->
-    <section id="tab-about" class="tab-panel">
+    <!-- About tab -->
+    <section id="tab-about" class="tab-panel" aria-labelledby="tab_about">
       <div class="panel-inner">
         <section class="card card-soft with-padding">
-          <h2 class="section-title" data-i18n="about_title">About FindIt</h2>
-          <p data-i18n="about_body">FindIt is a catalog app.</p>
+          <div class="toolbar tight">
+            <h2 class="section-title" data-i18n="about_title">About FindIt</h2>
+          </div>
+          <p data-i18n="about_body">
+            FindIt is a warm, simple personal catalog to keep track of your items using images, titles,
+            and tags. Works offline and can be installed on your device.
+          </p>
+          <p>
+            <span data-i18n="about_repo_label">GitHub project:</span>
+            <a href="https://github.com/avisahy/findit" target="_blank" rel="noopener">
+              github.com/avisahy/findit
+            </a>
+          </p>
         </section>
       </div>
     </section>
   </main>
 
-  <nav class="tab-bar">
-    <button class="tab-button active" data-tab="catalog"><span data-i18n="tab_catalog">Catalog</span></button>
-    <button class="tab-button" data-tab="add"><span data-i18n="tab_add">Add</span></button>
-    <button class="tab-button" data-tab="settings"><span data-i18n="tab_settings">Settings</span></button>
-    <button class="tab-button" data-tab="about"><span data-i18n="tab_about">About</span></button>
+  <!-- Bottom navigation -->
+  <nav class="tab-bar" aria-label="Main navigation">
+    <button class="tab-button active" data-tab="catalog">
+      <span class="tab-icon">🏠</span>
+      <span data-i18n="tab_catalog">Catalog</span>
+    </button>
+    <button class="tab-button" data-tab="add">
+      <span class="tab-icon">➕</span>
+      <span data-i18n="tab_add">Add</span>
+    </button>
+    <button class="tab-button" data-tab="settings">
+      <span class="tab-icon">⚙️</span>
+      <span data-i18n="tab_settings">Settings</span>
+    </button>
+    <button class="tab-button" data-tab="about">
+      <span class="tab-icon">ℹ️</span>
+      <span data-i18n="tab_about">About</span>
+    </button>
   </nav>
 
-  <div id="slide-tooltip" class="tooltip">⬅️ ➡️</div>
-
-  <div id="image-modal" class="image-modal">
+  <!-- Image modal -->
+  <div id="image-modal" class="image-modal" aria-hidden="true">
     <div class="image-modal-backdrop"></div>
     <img id="image-modal-img" alt="" />
-    <button id="image-modal-close" class="btn btn-soft small">✕</button>
+    <button id="image-modal-close" class="btn btn-soft small" aria-label="Close">✕</button>
   </div>
 
+  <!-- Item card template -->
   <template id="item-card-template">
     <article class="item-card card card-soft">
       <div class="item-image-wrapper">
@@ -157,11 +245,11 @@
       </div>
       <div class="item-content">
         <div class="item-header-line">
-          <h3 class="item-name"></h3>
+          <h3 class="item-title"></h3>
           <span class="item-category-badge"></span>
         </div>
         <p class="item-description"></p>
-        <div class="item-location-row"></div>
+        <div class="item-tags-row"></div>
       </div>
       <div class="item-actions">
         <button class="btn btn-soft small" data-action="edit"><span data-i18n="btn_edit">Edit</span></button>
