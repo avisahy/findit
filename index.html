@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111111" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <title>My Items Catalog</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1 id="app-title">My Items Catalog</h1>
+
+    <nav class="toolbar" aria-label="App toolbar">
+      <button id="darkToggle" class="btn" aria-pressed="false" aria-label="Toggle dark mode">Dark</button>
+      <button id="notifyBtn" class="btn" aria-label="Enable notifications">Notify</button>
+      <button id="exportJsonBtn" class="btn" aria-label="Export as JSON">Export JSON</button>
+      <button id="exportCsvBtn" class="btn" aria-label="Export as CSV">Export CSV</button>
+    </nav>
+
+    <section class="filters" aria-labelledby="filters-title">
+      <h2 id="filters-title" class="visually-hidden">Filters</h2>
+      <div class="filter-row">
+        <label for="searchInput" class="filter-label">Search</label>
+        <input id="searchInput" type="search" placeholder="Search by title or description" aria-label="Search items" />
+      </div>
+      <div class="filter-row">
+        <label for="categoryFilter" class="filter-label">Category</label>
+        <select id="categoryFilter" aria-label="Filter by category">
+          <option value="">All</option>
+          <option value="Books">Books</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Misc">Misc</option>
+        </select>
+      </div>
+    </section>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="add-item" aria-labelledby="add-item-title">
+      <h2 id="add-item-title">Add new item</h2>
+      <form id="itemForm" aria-describedby="form-desc">
+        <p id="form-desc" class="hint">Add an item with a title, description, category, and image. You can use your camera on mobile.</p>
+
+        <div class="form-row">
+          <label for="title">Title</label>
+          <input id="title" name="title" type="text" required maxlength="120" />
+        </div>
+
+        <div class="form-row">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3" maxlength="1000"></textarea>
+        </div>
+
+        <div class="form-row">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="">Choose…</option>
+            <option value="Books">Books</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Misc">Misc</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="imageInput">Image</label>
+          <input id="imageInput" name="image" type="file" accept="image/*" capture="environment" />
+          <small class="hint">Images are compressed to thumbnail automatically.</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary" aria-label="Add item">Add item</button>
+          <button type="reset" class="btn" aria-label="Reset form">Reset</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="items" aria-labelledby="items-title">
+      <h2 id="items-title">Your items</h2>
+      <div id="itemsGrid" class="grid" role="list" aria-live="polite" aria-busy="false"></div>
+      <p id="emptyState" class="empty" hidden>No items yet. Add your first one above.</p>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Works offline. Install via browser menu for quick access.</p>
+  </footer>
+
+  <template id="itemCardTemplate">
+    <article class="card" role="listitem" draggable="true" aria-grabbed="false" tabindex="0">
+      <div class="thumb-wrap">
+        <img class="thumb" alt="" />
+      </div>
+      <div class="card-body">
+        <h3 class="card-title"></h3>
+        <p class="card-desc"></p>
+        <p class="card-cat"></p>
+      </div>
+      <div class="card-actions">
+        <button class="btn small move-handle" aria-label="Drag to reorder" title="Drag to reorder">↕</button>
+        <button class="btn small delete-btn" aria-label="Delete item">Delete</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js" type="module"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+  </script>
+</body>
+</html>
