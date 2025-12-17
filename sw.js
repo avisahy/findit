@@ -1,17 +1,18 @@
-/* Service Worker for Item Catalog PWA */
+/* Service Worker for FindIt PWA */
 
 const CACHE_VERSION = 'v1';
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const IMG_CACHE = `images-${CACHE_VERSION}`;
 
+// IMPORTANT: include /findit/ prefix for GitHub Pages
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/findit/',
+  '/findit/index.html',
+  '/findit/styles.css',
+  '/findit/app.js',
+  '/findit/manifest.json',
+  '/findit/icons/icon-192.png',
+  '/findit/icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -38,7 +39,7 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Cache-first for same-origin static assets
+  // Cache-first for static assets
   if (url.origin === self.location.origin) {
     if (STATIC_ASSETS.includes(url.pathname)) {
       event.respondWith(
@@ -52,7 +53,7 @@ self.addEventListener('fetch', event => {
     }
   }
 
-  // Cache images by request destination
+  // Cache images
   if (req.destination === 'image') {
     event.respondWith(
       caches.match(req).then(cached => cached || fetch(req).then(res => {
@@ -64,7 +65,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Network-first for other requests, fallback to cache
+  // Network-first for other requests
   event.respondWith(
     fetch(req).then(res => {
       const copy = res.clone();
