@@ -1,230 +1,267 @@
-// findit/js/app.js
-import { DB } from './db.js';
-import { I18n } from './i18n.js';
-import { UI } from './ui.js';
+import { dbInit, dbGetAll, dbPut, dbDelete, dbClearAll } from './db.js';
+import { i18nInit, i18nT } from './i18n.js';
+import { uiInitNavigation, uiInitDarkMode, renderCatalog, viewerInit } from './ui.js';
 
-let state = {
-  items: [],
-  theme: 'dark',
-  lang: 'en',
-  cursor: 0 // for swipe navigation
-};
+let items = [];
+const viewer = viewerInit();
 
-const els = {
-  exportBtn: document.getElementById('exportBtn'),
-  importInput: document.getElementById('importInput'),
-  resetBtn: document.getElementById('resetBtn'),
-  itemForm: document.getElementById('itemForm'),
-  itemId: document.getElementById('itemId'),
-  itemTitle: document.getElementById('itemTitle'),
-  itemDesc: document.getElementById('itemDesc'),
-  itemImage: document.getElementById('itemImage'),
-  itemCamera: document.getElementById('itemCamera'),
-  imagePreview: document.getElementById('imagePreview'),
-  cancelEdit: document.getElementById('cancelEdit'),
-  settingsExport: document.getElementById('settingsExport'),
-  settingsImport: document.getElementById('settingsImport'),
-  settingsReset: document.getElementById('settingsReset')
-};
-
-async function init() {
-  // Load meta (theme/lang)
-  state.theme = (await DB.getMeta('theme')) || 'dark';
-  state.lang = (await DB.getMeta('lang')) || 'en';
-
-  UI.applyTheme(state.theme);
-  const langControl = UI.initLang(async (val) => {
-    state.lang = val;
-    await DB.setMeta('lang', val);
-    await I18n.load(val);
-    UI.updateTexts();
-  });
-
-  await I18n.load(state.lang);
-  langControl.set(state.lang);
-
-  UI.initTabs();
-  UI.initModal();
-  UI.initNavigation();
-  UI.setYear();
-  UI.initInstall();
-
-  UI.initTheme(async () => {
-    state.theme = state.theme === 'dark' ? 'light' : 'dark';
-    UI.applyTheme(state.theme);
-    await DB.setMeta('theme', state.theme);
-  });
-
-  UI.initSearch(() => UI.renderGrid(state.items));
-
-  await reloadItems();
-  bindEvents();
+async function refresh() {
+  items = await dbGetAll();
+  renderCatalog(items, handleEdit, handleDelete, handleView);
+  document.getElementById('emptyState').hidden = items.length > 0;
 }
 
-async function reloadItems() {
-  state.items = await DB.getAllItems();
-  state.items.sort((a, b) => (b.id || 0) - (a.id || 0));
-  UI.renderGrid(state.items);
+function handleView(item) {
+  if (!item.image) return;
+  viewer.open(item.image, item.title || '');
 }
 
-function dataUrlFromFile(file) {
+function handleEdit(item) {
+  location.hash = '#editor';
+  document.getElementById('editorTitle').textContent = i18nT('editItem');
+  document.getElementById('itemId').value = item.id;
+  document.getElementById('itemTitle').value = item.title || '';
+  document.getElementById('itemDesc').value = item.description || '';
+  setPreview(item.image);
+}
+
+async function handleDelete(id) {
+  if (!confirm(i18nT('confirmDelete'))) return;
+  await dbDelete(id);
+  refresh();
+}
+
+function setPreview(dataUrl) {
+  const preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+  if (!dataUrl) return;
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.alt = 'preview';
+  img.loading = 'lazy';
+  img.addEventListener('click', () => viewer.open(dataUrl, 'preview'));
+  preview.appendChild(img);
+}
+
+// Image input handling
+function initImageInputs() {
+  const fileInput = document.getElementById('itemImage');
+  const cameraBtn = document.getElementById('cameraBtn');
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const dataUrl = await fileToDataURL(file);
+    setPreview(dataUrl);
+    fileInput.dataset.dataUrl = dataUrl;
+  });
+
+  cameraBtn.addEventListener('click', async () => {
+    // Use input capture for broad support
+    const a = document.createElement('input');
+    a.type = 'file';
+    a.accept = 'image/*';
+    a.capture = 'environment';
+    a.addEventListener('change', async () => {
+      const file = a.files?.[0];
+      if (!file) return;
+      const dataUrl = await fileToDataURL(file);
+      setPreview(dataUrl);
+      document.getElementById('itemImage').dataset.dataUrl = dataUrl;
+    });
+    a.click();
+  });
+}
+
+function fileToDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error);
+    reader.onerror = (e) => reject(e);
     reader.readAsDataURL(file);
   });
 }
 
-function setPreview(src) {
-  els.imagePreview.innerHTML = src ? `<img src="${src}" alt="preview" class="thumb" />` : '';
-}
-
-function clearForm() {
-  els.itemId.value = '';
-  els.itemTitle.value = '';
-  els.itemDesc.value = '';
-  els.itemImage.value = '';
-  els.itemCamera.value = '';
-  setPreview('');
-}
-
-function bindEvents() {
-  // Image inputs
-  els.itemImage.addEventListener('change', async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await dataUrlFromFile(file);
-    setPreview(url);
-    els.itemImage.dataset.url = url;
-  });
-  els.itemCamera.addEventListener('change', async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await dataUrlFromFile(file);
-    setPreview(url);
-    els.itemCamera.dataset.url = url;
-  });
-
-  // Save item
-  els.itemForm.addEventListener('submit', async (e) => {
+// Form submit
+function initEditorForm() {
+  const form = document.getElementById('itemForm');
+  const cancel = document.getElementById('cancelEdit');
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = els.itemId.value ? Number(els.itemId.value) : undefined;
-    const image = els.itemCamera.dataset.url || els.itemImage.dataset.url || null;
-    const item = {
-      id,
-      title: els.itemTitle.value.trim(),
-      description: els.itemDesc.value.trim(),
-      image
-    };
-    if (!item.title) return;
+    const id = document.getElementById('itemId').value || undefined;
+    const title = document.getElementById('itemTitle').value.trim();
+    const description = document.getElementById('itemDesc').value.trim();
+    const image = document.getElementById('itemImage').dataset.dataUrl || undefined;
 
-    if (id) {
-      await DB.updateItem(item);
-    } else {
-      delete item.id;
-      const newId = await DB.addItem(item);
-      item.id = newId;
+    if (!title) {
+      alert(i18nT('titleRequired'));
+      return;
     }
 
-    clearForm();
-    await reloadItems();
-    // Switch back to catalog
-    document.querySelector('[data-tab="catalog"]').click();
+    await dbPut({ id, title, description, image });
+    // Reset form
+    form.reset();
+    document.getElementById('itemId').value = '';
+    document.getElementById('itemImage').dataset.dataUrl = '';
+    document.getElementById('imagePreview').innerHTML = '';
+
+    location.hash = '#catalog';
+    refresh();
   });
 
-  // Cancel edit
-  els.cancelEdit.addEventListener('click', () => clearForm());
+  cancel.addEventListener('click', () => {
+    form.reset();
+    document.getElementById('itemId').value = '';
+    document.getElementById('itemImage').dataset.dataUrl = '';
+    document.getElementById('imagePreview').innerHTML = '';
+    location.hash = '#catalog';
+  });
+}
 
-  // Export
-  const exportHandler = async () => {
-    const items = await DB.getAllItems();
-    const blob = new Blob([JSON.stringify({ items }, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `findit-export-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-  els.exportBtn.addEventListener('click', exportHandler);
-  els.settingsExport.addEventListener('click', exportHandler);
+// Export / Import
+function initImportExport() {
+  const exportJson = document.getElementById('exportJson');
+  const exportCsv = document.getElementById('exportCsv');
+  const importFile = document.getElementById('importFile');
 
-  // Import
-  const importHandler = async (file) => {
+  exportJson.addEventListener('click', async () => {
+    const data = await dbGetAll();
+    const blob = new Blob([JSON.stringify({ version: 1, items: data }, null, 2)], { type: 'application/json' });
+    downloadBlob(blob, 'findit-export.json');
+  });
+
+  exportCsv.addEventListener('click', async () => {
+    const data = await dbGetAll();
+    const header = ['id', 'title', 'description', 'image', 'createdAt'];
+    const lines = [header.join(',')];
+    data.forEach((i) => {
+      const row = header.map((k) => csvEscape(String(i[k] ?? '')));
+      lines.push(row.join(','));
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    downloadBlob(blob, 'findit-export.csv');
+  });
+
+  importFile.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     const text = await file.text();
-    const json = JSON.parse(text);
-    const items = Array.isArray(json.items) ? json.items : [];
-    for (const it of items) {
-      // Strip id to avoid clashes; let DB assign
-      const { title, description, image } = it;
-      await DB.addItem({ title, description, image });
+    try {
+      if (file.name.endsWith('.json')) {
+        const json = JSON.parse(text);
+        if (!json || !Array.isArray(json.items)) throw new Error('Invalid schema');
+        for (const item of json.items) {
+          validateItem(item);
+          await dbPut(item);
+        }
+      } else if (file.name.endsWith('.csv')) {
+        const itemsFromCsv = parseCsv(text);
+        for (const item of itemsFromCsv) {
+          validateItem(item);
+          await dbPut(item);
+        }
+      } else {
+        throw new Error('Unsupported file type');
+      }
+      alert(i18nT('importSuccess'));
+      refresh();
+    } catch (err) {
+      console.error(err);
+      alert(i18nT('importError'));
+    } finally {
+      e.target.value = '';
     }
-    await reloadItems();
-  };
-  els.importInput.addEventListener('change', async (e) => {
-    const file = e.target.files?.[0];
-    if (file) await importHandler(file);
-    e.target.value = '';
   });
-  els.settingsImport.addEventListener('change', async (e) => {
-    const file = e.target.files?.[0];
-    if (file) await importHandler(file);
-    e.target.value = '';
-  });
-
-  // Reset
-  const resetHandler = async () => {
-    const ok = confirm('Delete all data? This cannot be undone.');
-    if (!ok) return;
-    await DB.clearAll();
-    await reloadItems();
-    clearForm();
-    // Reset meta defaults
-    state.theme = 'dark';
-    state.lang = 'en';
-    await DB.setMeta('theme', state.theme);
-    await DB.setMeta('lang', state.lang);
-    UI.applyTheme(state.theme);
-    await I18n.load(state.lang);
-    UI.updateTexts();
-  };
-  els.resetBtn.addEventListener('click', resetHandler);
-  els.settingsReset.addEventListener('click', resetHandler);
-
-  // Edit/delete from UI custom events
-  window.addEventListener('ui:edit', (ev) => {
-    const it = ev.detail;
-    document.querySelector('[data-tab="addEdit"]').click();
-    els.itemId.value = it.id;
-    els.itemTitle.value = it.title || '';
-    els.itemDesc.value = it.description || '';
-    setPreview(it.image || '');
-    els.itemImage.dataset.url = it.image || '';
-    els.itemCamera.dataset.url = '';
-  });
-  window.addEventListener('ui:delete', async (ev) => {
-    const id = ev.detail;
-    await DB.deleteItem(id);
-    await reloadItems();
-  });
-
-  // Swipe navigation: move cursor and open image
-  window.addEventListener('ui:swipeRight', () => navigate(-1));
-  window.addEventListener('ui:swipeLeft', () => navigate(+1));
 }
 
-function navigate(delta) {
-  if (state.items.length === 0) return;
-  state.cursor = (state.cursor + delta + state.items.length) % state.items.length;
-  const item = state.items[state.cursor];
-  // open preview
-  const modal = document.getElementById('imageModal');
-  const img = document.getElementById('modalImage');
-  img.src = item.image || '';
-  modal.setAttribute('aria-hidden', 'false');
+function validateItem(item) {
+  // Minimal schema validation
+  if (typeof item.title !== 'string' || item.title.trim() === '') {
+    throw new Error('Invalid title');
+  }
+  item.description = typeof item.description === 'string' ? item.description : '';
+  item.image = typeof item.image === 'string' ? item.image : '';
+  item.id = item.id || crypto.randomUUID();
+  item.createdAt = Number(item.createdAt || Date.now());
 }
 
-window.addEventListener('DOMContentLoaded', init);
+function parseCsv(text) {
+  const lines = text.split(/\r?\n/).filter(Boolean);
+  const header = lines.shift().split(',');
+  const items = lines.map((line) => {
+    const cols = splitCsvLine(line);
+    const obj = {};
+    header.forEach((h, idx) => obj[h] = cols[idx] ?? '');
+    obj.createdAt = Number(obj.createdAt || Date.now());
+    return obj;
+  });
+  return items;
+}
 
-document.documentElement.setAttribute('data-theme', 'dark'); // or 'light'
+function splitCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"'; i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (c === ',' && !inQuotes) {
+      out.push(cur); cur = '';
+    } else {
+      cur += c;
+    }
+  }
+  out.push(cur);
+  return out.map((s) => s.replace(/\r/g, ''));
+}
 
+function csvEscape(s) {
+  if (s.includes('"') || s.includes(',') || s.includes('\n')) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Reset
+function initReset() {
+  document.getElementById('resetApp').addEventListener('click', async () => {
+    if (!confirm(i18nT('confirmReset'))) return;
+    await dbClearAll();
+    localStorage.clear();
+    location.reload();
+  });
+}
+
+function initMeta() {
+  document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('versionInfo').textContent = 'Version 1.0.0';
+}
+
+(async function boot() {
+  uiInitDarkMode();
+  await i18nInit();
+  uiInitNavigation();
+  initEditorForm();
+  initImageInputs();
+  initImportExport();
+  initReset();
+  initMeta();
+  await dbInit();
+  await refresh();
+})();
