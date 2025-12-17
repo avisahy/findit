@@ -298,3 +298,8 @@ body {
   border-radius: 1rem;
   box-shadow: 0 12px 30px rgba(0,0,0,0.6);
 }
+
+.modal[hidden] {
+  display: none !important;
+}
+
