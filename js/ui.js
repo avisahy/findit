@@ -13,6 +13,7 @@ function openImageModal(src, alt) {
   img.src = src;
   img.alt = alt || "";
   modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
 }
 
 function closeImageModal() {
@@ -21,15 +22,27 @@ function closeImageModal() {
   img.src = "";
   img.alt = "";
   modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
 }
 
 function bindImageModalEvents() {
   const modal = document.getElementById("image-modal");
   const backdrop = modal.querySelector(".image-modal-backdrop");
   const closeBtn = document.getElementById("image-modal-close");
+
   backdrop.addEventListener("click", closeImageModal);
   closeBtn.addEventListener("click", closeImageModal);
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeImageModal(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeImageModal();
+  });
+
+  const preview = document.getElementById("preview-img");
+  if (preview) {
+    preview.addEventListener("click", () => {
+      if (!preview.src) return;
+      openImageModal(preview.src, "preview");
+    });
+  }
 }
 
 function createItemCard(item) {
@@ -37,30 +50,54 @@ function createItemCard(item) {
   const fragment = template.content.cloneNode(true);
   const card = fragment.querySelector(".item-card");
 
-  card.querySelector(".item-name").textContent = item.name || "";
-  const categoryBadge = card.querySelector(".item-category-badge");
-  categoryBadge.textContent = item.category || "";
-  categoryBadge.style.display = item.category ? "inline-block" : "none";
-  card.querySelector(".item-description").textContent = item.description || "";
-  card.querySelector(".item-location-row").textContent = item.location ? `📍 ${item.location}` : "";
-
   const imgEl = card.querySelector(".item-image");
+  const titleEl = card.querySelector(".item-title");
+  const descEl = card.querySelector(".item-description");
+  const categoryBadge = card.querySelector(".item-category-badge");
+  const tagsRow = card.querySelector(".item-tags-row");
+
   if (item.imageDataUrl) {
     imgEl.src = item.imageDataUrl;
-    imgEl.alt = item.name || "";
+    imgEl.alt = item.title || "";
     imgEl.style.display = "block";
-    imgEl.addEventListener("click", () => openImageModal(item.imageDataUrl, item.name));
+
+    imgEl.addEventListener("click", () => {
+      openImageModal(item.imageDataUrl, item.title);
+    });
   } else {
     imgEl.style.display = "none";
   }
 
+  titleEl.textContent = item.title || "";
+  descEl.textContent = item.description || "";
+
+  if (item.category) {
+    categoryBadge.textContent = item.category;
+    categoryBadge.style.display = "inline-block";
+  } else {
+    categoryBadge.style.display = "none";
+  }
+
+  tagsRow.innerHTML = "";
+  if (item.tags && item.tags.length) {
+    item.tags.forEach(tag => {
+      const span = document.createElement("span");
+      span.className = "item-tag-pill";
+      span.textContent = `#${tag}`;
+      tagsRow.appendChild(span);
+    });
+  }
+
+  card.dataset.id = item.id;
+
+  // Translate buttons for current language
   translateDynamicCardButtons(card);
 
   card.querySelector('[data-action="edit"]').addEventListener("click", () => {
     fillFormForEdit(item);
     switchTab("add");
-    showSlideTooltipOnce();
   });
+
   card.querySelector('[data-action="delete"]').addEventListener("click", async () => {
     if (window.confirm(t("confirm_delete_item"))) {
       await dbDeleteItem(item.id);
@@ -74,37 +111,34 @@ function createItemCard(item) {
 function clearForm() {
   document.getElementById("item-id").value = "";
   document.getElementById("item-index").value = "";
-  document.getElementById("item-name").value = "";
+  document.getElementById("item-title").value = "";
   document.getElementById("item-description").value = "";
   document.getElementById("item-category").value = "";
-  document.getElementById("item-location").value = "";
+  document.getElementById("item-tags").value = "";
   document.getElementById("item-image").value = "";
   const preview = document.getElementById("preview-img");
   if (preview) {
     preview.src = "";
     preview.style.display = "none";
   }
-  document.getElementById("btn-remove-picture").style.display = "none";
 }
 
 function fillFormForEdit(item, index = null) {
   document.getElementById("item-id").value = item.id || "";
   document.getElementById("item-index").value = index !== null ? index : "";
-  document.getElementById("item-name").value = item.name || "";
+  document.getElementById("item-title").value = item.title || "";
   document.getElementById("item-description").value = item.description || "";
   document.getElementById("item-category").value = item.category || "";
-  document.getElementById("item-location").value = item.location || "";
+  document.getElementById("item-tags").value = (item.tags || []).join(", ");
   document.getElementById("item-image").value = "";
 
   const preview = document.getElementById("preview-img");
   if (preview && item.imageDataUrl) {
     preview.src = item.imageDataUrl;
     preview.style.display = "block";
-    document.getElementById("btn-remove-picture").style.display = "inline-block";
-  } else {
+  } else if (preview) {
     preview.src = "";
     preview.style.display = "none";
-    document.getElementById("btn-remove-picture").style.display = "none";
   }
 }
 
@@ -117,7 +151,14 @@ async function refreshItems() {
   listEl.innerHTML = "";
 
   const filtered = items.filter(item => {
-    const text = [item.name, item.description, item.category, item.location].join(" ").toLowerCase();
+    const text = [
+      item.title,
+      item.description,
+      item.category,
+      ...(item.tags || [])
+    ]
+      .join(" ")
+      .toLowerCase();
     return text.includes(searchValue);
   });
 
@@ -132,6 +173,7 @@ async function refreshItems() {
   });
 }
 
+/* Navigation through items when editing */
 async function navigateEdit(direction) {
   const items = await dbGetAllItems();
   if (!items.length) return;
@@ -140,24 +182,16 @@ async function navigateEdit(direction) {
   let currentIndex = currentIndexRaw === "" ? -1 : Number(currentIndexRaw);
 
   if (currentIndex === -1) {
+    // If editing not started, start from first/last depending on direction
     currentIndex = direction === "next" ? 0 : items.length - 1;
   } else {
-    currentIndex = direction === "next"
-      ? (currentIndex + 1) % items.length
-      : (currentIndex - 1 + items.length) % items.length;
+    currentIndex =
+      direction === "next"
+        ? (currentIndex + 1) % items.length
+        : (currentIndex - 1 + items.length) % items.length;
   }
 
   const item = items[currentIndex];
   fillFormForEdit(item, currentIndex);
   switchTab("add");
-}
-
-function showSlideTooltipOnce() {
-  if (localStorage.getItem("slideTooltipShown")) return;
-  const tooltip = document.getElementById("slide-tooltip");
-  tooltip.style.display = "block";
-  setTimeout(() => {
-    tooltip.style.display = "none";
-    localStorage.setItem("slideTooltipShown", "true");
-  }, 5000);
 }
