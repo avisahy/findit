@@ -110,12 +110,12 @@
   </template>
 
   <script src="app.js" type="module"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
-      });
-    }
-  </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/findit/sw.js');
+  });
+}
+</script>
 </body>
 </html>
