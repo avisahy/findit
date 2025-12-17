@@ -9,6 +9,7 @@
   <title>FindIt Catalog</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header class="app-header">
     <h1>FindIt Catalog</h1>
@@ -17,40 +18,54 @@
     </nav>
   </header>
 
-  <!-- Tab navigation -->
+  <!-- Tabs -->
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="items">Your Items</button>
-    <button class="tab-btn" data-tab="add">Add Item</button>
-    <button class="tab-btn" data-tab="settings">Settings</button>
+    <button class="tab-btn active" data-tab="items">
+      <span class="icon">📂</span> Your Items
+    </button>
+    <button class="tab-btn" data-tab="add">
+      <span class="icon">➕</span> Add Item
+    </button>
+    <button class="tab-btn" data-tab="settings">
+      <span class="icon">⚙️</span> Settings
+    </button>
   </nav>
 
   <main>
-    <!-- Tab panels -->
-    <section id="tab-items" class="tab-panel active" aria-labelledby="items-title">
-      <h2 id="items-title">Your Items</h2>
+
+    <!-- ITEMS TAB -->
+    <section id="tab-items" class="tab-panel active">
+      <input id="searchInput" class="search-bar" type="text" placeholder="Search items...">
+
       <div id="itemsGrid" class="grid" role="list" aria-live="polite" aria-busy="false"></div>
       <p id="emptyState" class="empty" hidden>No items yet. Add your first one in the Add Item tab.</p>
     </section>
 
-    <section id="tab-add" class="tab-panel" aria-labelledby="add-item-title">
-      <h2 id="add-item-title">Add New Item</h2>
+    <!-- ADD ITEM TAB -->
+    <section id="tab-add" class="tab-panel">
+      <h2>Add New Item</h2>
+
       <form id="itemForm">
         <div class="form-row">
           <label for="title">Title</label>
           <input id="title" type="text" required maxlength="120" />
         </div>
+
         <div class="form-row">
           <label for="description">Description</label>
           <textarea id="description" rows="3" maxlength="1000"></textarea>
         </div>
+
         <div class="form-row">
           <label for="category">Category</label>
-          <input id="category" type="text" placeholder="Enter category" required />
+          <input id="category" type="text" required />
         </div>
+
         <div class="form-row">
           <label for="imageInput">Image</label>
           <input id="imageInput" type="file" accept="image/*" capture="environment" />
         </div>
+
         <div class="form-actions">
           <button type="submit" class="btn primary">Add Item</button>
           <button type="reset" class="btn">Reset</button>
@@ -58,42 +73,55 @@
       </form>
     </section>
 
-    <section id="tab-settings" class="tab-panel" aria-labelledby="settings-title">
-      <h2 id="settings-title">Settings</h2>
+    <!-- SETTINGS TAB -->
+    <section id="tab-settings" class="tab-panel">
+      <h2>Settings</h2>
+
       <div class="settings-actions">
         <button id="exportJsonBtn" class="btn primary">Export JSON</button>
         <button id="exportCsvBtn" class="btn primary">Export CSV</button>
+
         <input id="importFile" type="file" accept=".json,.csv" hidden />
         <button id="importBtn" class="btn">Import Catalog</button>
+
         <button id="notifyBtn" class="btn">Enable Notifications</button>
         <button id="installBtn" class="btn">Install App</button>
       </div>
     </section>
+
   </main>
 
   <footer class="app-footer">
     <p>Works offline. Install via browser menu for quick access.</p>
   </footer>
 
-  <!-- Template for item cards -->
+  <!-- ITEM TEMPLATE -->
   <template id="itemCardTemplate">
-    <article class="card" role="listitem" draggable="true" aria-grabbed="false" tabindex="0">
+    <article class="card" role="listitem" tabindex="0">
       <div class="thumb-wrap">
         <img class="thumb" alt="" />
       </div>
+
       <div class="card-body">
         <h3 class="card-title"></h3>
         <p class="card-desc"></p>
         <p class="card-cat"></p>
       </div>
+
       <div class="card-actions">
-        <button class="btn small move-handle" aria-label="Drag to reorder">↕</button>
-        <button class="btn small delete-btn" aria-label="Delete item">Delete</button>
+        <button class="btn small edit-btn">Edit</button>
+        <button class="btn small delete-btn">Delete</button>
       </div>
     </article>
   </template>
 
+  <!-- FULLSCREEN IMAGE MODAL -->
+  <div id="imageModal" class="modal" hidden>
+    <img id="modalImage" alt="">
+  </div>
+
   <script src="app.js" type="module"></script>
+
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -101,5 +129,6 @@
       });
     }
   </script>
+
 </body>
 </html>
