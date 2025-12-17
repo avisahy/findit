@@ -1,35 +1,15 @@
 {
-  "name": "FindIt – Local Catalog",
+  "name": "FindIt Catalog",
   "short_name": "FindIt",
-  "description": "FindIt is a private, offline‑first catalog PWA that stores your items locally in your browser.",
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "/findit/",
+  "scope": "/findit/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#12141b",
-  "theme_color": "#18181f",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "A fast, installable, offline‑ready catalog app.",
   "icons": [
-    {
-      "src": "assets/icons/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "assets/icons/icon-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "assets/icons/maskable-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "assets/icons/maskable-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
