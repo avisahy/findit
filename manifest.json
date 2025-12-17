@@ -1,22 +1,25 @@
-
+// findit/manifest.json
 {
   "name": "FindIt",
   "short_name": "FindIt",
-  "start_url": "/findit/index.html",
+  "start_url": "/findit/",
   "scope": "/findit/",
   "display": "standalone",
-  "background_color": "#1E1A17",
-  "theme_color": "#1E1A17",
+  "background_color": "#0b1020",
+  "theme_color": "#111827",
+  "description": "Catalog items with pictures. Offline, installable, English/Hebrew, dark mode.",
   "icons": [
     {
       "src": "img/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "img/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
