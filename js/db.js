@@ -1,7 +1,6 @@
 const DB_NAME = "findit-db";
 const DB_VERSION = 1;
 const STORE_ITEMS = "items";
-
 let dbInstance = null;
 
 function openDb() {
@@ -17,7 +16,7 @@ function openDb() {
           keyPath: "id",
           autoIncrement: true
         });
-        store.createIndex("title", "title", { unique: false });
+        store.createIndex("name", "name", { unique: false });
       }
     };
 
