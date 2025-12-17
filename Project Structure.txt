@@ -1,3 +1,6 @@
+https://copilot.microsoft.com/shares/3kgnQhuSAYntL1ywm7JyS
+
+
 findit/
 ├── index.html              # Main entry point (UI, catalog grid, navigation)
 ├── manifest.json           # PWA metadata (name, icons, theme colors, install support)
