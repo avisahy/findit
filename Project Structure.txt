@@ -15,3 +15,59 @@ findit/
 ├── /lang
 │   ├── en.json             # English translations
 │   └── he.json             # Hebrew translations
+
+
+
+
+📱 PWA Responsive Native App Specification
+🔹 General
+Progressive Web App (PWA) with responsive design
+
+Runs natively across Desktop, Android, iOS
+
+Hosted on GitHub Pages at avisahy.github.io/findit
+
+Built with HTML, CSS, JavaScript only (no frameworks required unless optional)
+
+🎨 User Interface
+Modern 3D‑style GUI with smooth animations
+
+Dark mode toggle (sun 🌞 / moon 🌙 icons)
+
+Website name in top corner → links back to main page
+
+Swipe gestures (left/right) and keyboard arrows for navigation
+
+Full‑screen picture preview with zoom support
+
+🌍 Languages
+English / Hebrew toggle for full localization
+
+⚙️ Core Features
+Catalog items with pictures (add, edit, delete)
+
+Image selection from gallery or take picture with camera
+
+Export / Import catalog data (JSON/CSV)
+
+Full reset option → clears all data as if first login
+
+Local database with no storage limit (IndexedDB or similar)
+
+📑 Pages
+About page
+
+Settings page
+
+Add / Edit item page
+
+🛠️ Technical Notes
+Use IndexedDB or localStorage for offline catalog storage
+
+Ensure installability as a PWA (manifest + service worker)
+
+Responsive layout with flexbox / grid
+
+Optimize for touch + desktop input
+
+GitHub Actions or Pages for deployment
