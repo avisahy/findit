@@ -1,147 +1,144 @@
-<!-- findit/index.html -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#121212" />
   <title>FindIt</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="img/icon-192.png" />
-  <meta name="theme-color" content="#111827" />
+  <link rel="icon" href="img/icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <meta name="description" content="FindIt — Offline catalog PWA with images, import/export, and full localization." />
 </head>
 <body>
-  <header class="app-header">
-    <a class="brand" href="/" data-i18n="app_name">FindIt</a>
-
-    <div class="controls">
-      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
-        <span class="icon sun" aria-hidden="true">☀️</span>
-        <span class="icon moon" aria-hidden="true">🌙</span>
+  <header class="app-header" role="banner">
+    <a class="brand" href="https://avisahy.github.io/findit" aria-label="Go to homepage">FindIt</a>
+    <nav class="header-actions" aria-label="Primary">
+      <button id="darkToggle" class="icon-btn" aria-pressed="false" aria-label="Toggle theme">
+        <span id="darkIcon" aria-hidden="true">🌞</span>
       </button>
 
-      <select id="langSelect" class="select">
-        <option value="en">English</option>
-        <option value="he">עברית</option>
-      </select>
-
-      <button id="installBtn" class="btn" data-i18n="install">Install</button>
-    </div>
-  </header>
-
-  <nav class="app-nav">
-    <button class="tab-btn active" data-tab="catalog" data-i18n="nav_catalog">Catalog</button>
-    <button class="tab-btn" data-tab="addEdit" data-i18n="nav_add_edit">Add / Edit</button>
-    <button class="tab-btn" data-tab="settings" data-i18n="nav_settings">Settings</button>
-    <button class="tab-btn" data-tab="about" data-i18n="nav_about">About</button>
-  </nav>
-
-  <main class="app-main">
-    <!-- Catalog -->
-    <section id="catalog" class="tab active">
-      <div class="toolbar">
-        <input id="searchInput" class="input" type="search" placeholder="Search..." data-i18n-placeholder="search_placeholder" />
-        <button id="exportBtn" class="btn" data-i18n="export">Export</button>
-        <label class="file-btn">
-          <input id="importInput" type="file" accept=".json" />
-          <span data-i18n="import">Import</span>
-        </label>
-        <button id="resetBtn" class="btn danger" data-i18n="reset_all">Full delete all data</button>
+      <div class="lang-switch">
+        <label for="langSelect" class="sr-only">Language</label>
+        <select id="langSelect" aria-label="Language">
+          <option value="en">English</option>
+          <option value="he">עברית</option>
+        </select>
       </div>
 
-      <div id="catalogGrid" class="grid" tabindex="0" aria-label="Catalog grid"></div>
+      <a href="#about" class="link-btn" data-i18n="about">About</a>
+      <a href="#settings" class="link-btn" data-i18n="settings">Settings</a>
+      <a href="#add" class="primary-btn" data-i18n="addItem">Add item</a>
+    </nav>
+  </header>
 
-      <div class="empty" id="emptyState" hidden>
-        <p data-i18n="empty">No items yet. Add your first one!</p>
+  <main id="view" role="main">
+    <!-- Catalog grid -->
+    <section id="catalog" aria-label="Catalog">
+      <div class="catalog-grid" id="catalogGrid"></div>
+      <div class="empty-state" id="emptyState" hidden>
+        <p data-i18n="emptyCatalog">Your catalog is empty. Add your first item.</p>
       </div>
     </section>
 
-    <!-- Add/Edit -->
-    <section id="addEdit" class="tab">
-      <form id="itemForm" class="card" autocomplete="off">
-        <input type="hidden" id="itemId" />
-        <div class="form-row">
-          <label for="itemTitle" data-i18n="label_title">Title</label>
-          <input id="itemTitle" type="text" class="input" required />
+    <!-- Add/Edit item panel -->
+    <section id="editor" class="panel" aria-label="Editor" hidden>
+      <form id="itemForm" novalidate>
+        <h2 id="editorTitle" data-i18n="addItem">Add item</h2>
+        <label>
+          <span data-i18n="titleLabel">Title</span>
+          <input type="text" id="itemTitle" required aria-required="true" maxlength="120" />
+        </label>
+        <label>
+          <span data-i18n="descLabel">Description</span>
+          <textarea id="itemDesc" rows="3" maxlength="1000"></textarea>
+        </label>
+
+        <div class="image-inputs">
+          <label class="file-label">
+            <span data-i18n="imageLabel">Image</span>
+            <input type="file" id="itemImage" accept="image/*" />
+          </label>
+          <button type="button" id="cameraBtn" class="icon-btn" aria-label="Take a photo" data-i18n="cameraBtn">Camera</button>
         </div>
-        <div class="form-row">
-          <label for="itemDesc" data-i18n="label_desc">Description</label>
-          <textarea id="itemDesc" class="input"></textarea>
-        </div>
-        <div class="form-row">
-          <label data-i18n="label_image">Image</label>
-          <div class="img-inputs">
-            <input id="itemImage" type="file" accept="image/*" />
-            <input id="itemCamera" type="file" accept="image/*" capture="environment" />
-          </div>
-          <div id="imagePreview" class="image-preview" aria-label="Image preview"></div>
-        </div>
+
+        <div id="imagePreview" class="image-preview" aria-live="polite"></div>
+
         <div class="form-actions">
-          <button type="submit" class="btn primary" data-i18n="save">Save</button>
-          <button type="button" id="cancelEdit" class="btn" data-i18n="cancel">Cancel</button>
+          <button type="submit" class="primary-btn" data-i18n="save">Save</button>
+          <button type="button" id="cancelEdit" class="link-btn" data-i18n="cancel">Cancel</button>
         </div>
+
+        <input type="hidden" id="itemId" />
       </form>
     </section>
 
+    <!-- About -->
+    <section id="about" class="panel" hidden>
+      <h2 data-i18n="about">About</h2>
+      <p data-i18n="aboutText">FindIt is an offline-friendly PWA to catalog items with photos, available on desktop and mobile.</p>
+      <p id="versionInfo"></p>
+    </section>
+
     <!-- Settings -->
-    <section id="settings" class="tab">
-      <div class="card">
-        <h2 data-i18n="settings_title">Settings</h2>
-        <div class="form-row">
-          <label data-i18n="settings_theme">Theme</label>
-          <button id="settingsTheme" class="btn" data-i18n="toggle_theme">Toggle theme</button>
-        </div>
-        <div class="form-row">
-          <label data-i18n="settings_lang">Language</label>
-          <select id="settingsLang" class="select">
-            <option value="en">English</option>
-            <option value="he">עברית</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label data-i18n="settings_storage">Storage</label>
-          <button id="settingsExport" class="btn" data-i18n="export">Export</button>
-          <label class="file-btn">
-            <input id="settingsImport" type="file" accept=".json" />
-            <span data-i18n="import">Import</span>
+    <section id="settings" class="panel" hidden>
+      <h2 data-i18n="settings">Settings</h2>
+
+      <div class="setting-row">
+        <span data-i18n="theme">Theme</span>
+        <button id="settingsDarkToggle" class="icon-btn" data-i18n="toggleTheme">Toggle</button>
+      </div>
+
+      <div class="setting-row">
+        <span data-i18n="language">Language</span>
+        <select id="settingsLangSelect">
+          <option value="en">English</option>
+          <option value="he">עברית</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <span data-i18n="importExport">Import / Export</span>
+        <div class="setting-actions">
+          <button id="exportJson" class="link-btn" data-i18n="exportJson">Export JSON</button>
+          <button id="exportCsv" class="link-btn" data-i18n="exportCsv">Export CSV</button>
+          <label class="file-label">
+            <span data-i18n="importLabel">Import</span>
+            <input type="file" id="importFile" accept=".json,.csv" />
           </label>
-          <button id="settingsReset" class="btn danger" data-i18n="reset_all">Full delete all data</button>
         </div>
+      </div>
+
+      <div class="setting-row">
+        <span data-i18n="reset">Reset</span>
+        <button id="resetApp" class="danger-btn" data-i18n="resetButton">Full reset</button>
       </div>
     </section>
 
-    <!-- About -->
-    <section id="about" class="tab">
-      <div class="card">
-        <h2 data-i18n="about_title">About</h2>
-        <p data-i18n="about_body">
-          FindIt is a simple, privacy-friendly catalog app. Add items with pictures, manage them offline, and export your data anytime.
-        </p>
+    <!-- Fullscreen image viewer -->
+    <div id="viewerOverlay" class="viewer-overlay" hidden aria-hidden="true">
+      <div class="viewer-toolbar">
+        <button id="viewerClose" class="icon-btn" aria-label="Close">✕</button>
       </div>
-    </section>
+      <div id="viewerInner" class="viewer-inner">
+        <img id="viewerImg" alt="" />
+      </div>
+    </div>
   </main>
 
-  <!-- Fullscreen image modal -->
-  <div id="imageModal" class="modal" aria-hidden="true">
-    <div class="modal-backdrop"></div>
-    <div class="modal-content">
-      <button id="closeModal" class="icon-btn modal-close" aria-label="Close">✕</button>
-      <img id="modalImage" src="" alt="Preview" />
-    </div>
-  </div>
-
-  <footer class="app-footer">
-    <small>&copy; <span id="year"></span> <a href="/" class="brand" data-i18n="app_name">FindIt</a></small>
+  <footer class="app-footer" role="contentinfo">
+    <p>&copy; <span id="year"></span> FindIt</p>
   </footer>
 
-  <script src="js/db.js"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js');
+        navigator.serviceWorker.register('./service-worker.js');
       });
     }
   </script>
