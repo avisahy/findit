@@ -11,47 +11,54 @@
 </head>
 <body>
   <header class="app-header">
-    <h1 id="app-title">FindIt Catalog</h1>
-    <nav class="toolbar" aria-label="App toolbar">
+    <h1>FindIt Catalog</h1>
+    <nav class="toolbar">
       <button id="darkToggle" class="btn icon-btn" aria-pressed="false" aria-label="Toggle theme">🌙</button>
     </nav>
   </header>
 
-  <main id="main" tabindex="-1">
-    <section class="add-item" aria-labelledby="add-item-title">
-      <h2 id="add-item-title">Add new item</h2>
+  <!-- Tab navigation -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="items">Your Items</button>
+    <button class="tab-btn" data-tab="add">Add Item</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </nav>
+
+  <main>
+    <!-- Tab panels -->
+    <section id="tab-items" class="tab-panel active" aria-labelledby="items-title">
+      <h2 id="items-title">Your Items</h2>
+      <div id="itemsGrid" class="grid" role="list" aria-live="polite" aria-busy="false"></div>
+      <p id="emptyState" class="empty" hidden>No items yet. Add your first one in the Add Item tab.</p>
+    </section>
+
+    <section id="tab-add" class="tab-panel" aria-labelledby="add-item-title">
+      <h2 id="add-item-title">Add New Item</h2>
       <form id="itemForm">
         <div class="form-row">
           <label for="title">Title</label>
-          <input id="title" name="title" type="text" required maxlength="120" />
+          <input id="title" type="text" required maxlength="120" />
         </div>
         <div class="form-row">
           <label for="description">Description</label>
-          <textarea id="description" name="description" rows="3" maxlength="1000"></textarea>
+          <textarea id="description" rows="3" maxlength="1000"></textarea>
         </div>
         <div class="form-row">
           <label for="category">Category</label>
-          <input id="category" name="category" type="text" placeholder="Enter category" required />
+          <input id="category" type="text" placeholder="Enter category" required />
         </div>
         <div class="form-row">
           <label for="imageInput">Image</label>
-          <input id="imageInput" name="image" type="file" accept="image/*" capture="environment" />
+          <input id="imageInput" type="file" accept="image/*" capture="environment" />
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn primary">Add item</button>
+          <button type="submit" class="btn primary">Add Item</button>
           <button type="reset" class="btn">Reset</button>
         </div>
       </form>
     </section>
 
-    <section class="items" aria-labelledby="items-title">
-      <h2 id="items-title">Your items</h2>
-      <div id="itemsGrid" class="grid" role="list" aria-live="polite" aria-busy="false"></div>
-      <p id="emptyState" class="empty" hidden>No items yet. Add your first one above.</p>
-    </section>
-
-    <!-- Settings Page -->
-    <section class="settings" aria-labelledby="settings-title">
+    <section id="tab-settings" class="tab-panel" aria-labelledby="settings-title">
       <h2 id="settings-title">Settings</h2>
       <div class="settings-actions">
         <button id="exportJsonBtn" class="btn primary">Export JSON</button>
@@ -68,6 +75,7 @@
     <p>Works offline. Install via browser menu for quick access.</p>
   </footer>
 
+  <!-- Template for item cards -->
   <template id="itemCardTemplate">
     <article class="card" role="listitem" draggable="true" aria-grabbed="false" tabindex="0">
       <div class="thumb-wrap">
