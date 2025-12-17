@@ -1,70 +1,110 @@
-// findit/js/db.js
+// Simple IndexedDB wrapper with localStorage fallback
+
 const DB_NAME = 'findit-db';
 const DB_VERSION = 1;
-const STORE_ITEMS = 'items';
-const STORE_META = 'meta';
+const STORE_NAME = 'items';
+
+let useLocalStorage = false;
+let idb;
 
 function openDB() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
+    if (!('indexedDB' in window)) {
+      useLocalStorage = true;
+      resolve(null);
+      return;
+    }
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_ITEMS)) {
-        const store = db.createObjectStore(STORE_ITEMS, { keyPath: 'id', autoIncrement: true });
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
         store.createIndex('title', 'title', { unique: false });
-      }
-      if (!db.objectStoreNames.contains(STORE_META)) {
-        db.createObjectStore(STORE_META, { keyPath: 'key' });
+        store.createIndex('createdAt', 'createdAt', { unique: false });
       }
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      idb = req.result;
+      resolve(idb);
+    };
+    req.onerror = () => {
+      useLocalStorage = true;
+      resolve(null);
+    };
+  });
+}
+
+function lsGetAll() {
+  const raw = localStorage.getItem('findit-items');
+  try {
+    return JSON.parse(raw || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function lsSetAll(items) {
+  localStorage.setItem('findit-items', JSON.stringify(items));
+}
+
+export async function dbInit() {
+  await openDB();
+}
+
+export async function dbGetAll() {
+  if (useLocalStorage) return lsGetAll();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result.sort((a, b) => b.createdAt - a.createdAt));
     req.onerror = () => reject(req.error);
   });
 }
 
-async function withStore(storeName, mode, fn) {
-  const db = await openDB();
+export async function dbPut(item) {
+  const record = { ...item, id: item.id || crypto.randomUUID(), createdAt: item.createdAt || Date.now() };
+  if (useLocalStorage) {
+    const items = lsGetAll();
+    const idx = items.findIndex((x) => x.id === record.id);
+    if (idx >= 0) items[idx] = record; else items.unshift(record);
+    lsSetAll(items);
+    return record;
+  }
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, mode);
-    const store = tx.objectStore(storeName);
-    Promise.resolve(fn(store))
-      .then(resolve)
-      .catch(reject);
-    tx.oncomplete = () => db.close();
-    tx.onerror = () => reject(tx.error);
+    const tx = idb.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.put(record);
+    req.onsuccess = () => resolve(record);
+    req.onerror = () => reject(req.error);
   });
 }
 
-export const DB = {
-  async addItem(item) {
-    return withStore(STORE_ITEMS, 'readwrite', (s) => s.add(item));
-  },
-  async updateItem(item) {
-    return withStore(STORE_ITEMS, 'readwrite', (s) => s.put(item));
-  },
-  async deleteItem(id) {
-    return withStore(STORE_ITEMS, 'readwrite', (s) => s.delete(id));
-  },
-  async getItem(id) {
-    return withStore(STORE_ITEMS, 'readonly', (s) => s.get(id));
-  },
-  async getAllItems() {
-    return withStore(STORE_ITEMS, 'readonly', (s) =>
-      new Promise((resolve, reject) => {
-        const req = s.getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => reject(req.error);
-      })
-    );
-  },
-  async clearAll() {
-    await withStore(STORE_ITEMS, 'readwrite', (s) => s.clear());
-    await withStore(STORE_META, 'readwrite', (s) => s.clear());
-  },
-  async setMeta(key, value) {
-    return withStore(STORE_META, 'readwrite', (s) => s.put({ key, value }));
-  },
-  async getMeta(key) {
-    return withStore(STORE_META, 'readonly', (s) => s.get(key)).then((r) => (r ? r.value : null));
+export async function dbDelete(id) {
+  if (useLocalStorage) {
+    const items = lsGetAll().filter((x) => x.id !== id);
+    lsSetAll(items);
+    return;
   }
-};
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function dbClearAll() {
+  if (useLocalStorage) {
+    localStorage.removeItem('findit-items');
+    return;
+  }
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
