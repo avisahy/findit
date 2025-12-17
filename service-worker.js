@@ -13,9 +13,7 @@ const OFFLINE_URLS = [
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_URLS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_URLS)));
   self.skipWaiting();
 });
 
@@ -29,20 +27,18 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const request = event.request;
-  if (request.method !== "GET") return;
-
+  if (event.request.method !== "GET") return;
   event.respondWith(
-    caches.match(request).then(cached => {
+    caches.match(event.request).then(cached => {
       if (cached) return cached;
-      return fetch(request)
+      return fetch(event.request)
         .then(response => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
           return response;
         })
         .catch(() => {
-          if (request.mode === "navigate") {
+          if (event.request.mode === "navigate") {
             return caches.match("./index.html");
           }
           return new Response("Offline", { status: 503 });
