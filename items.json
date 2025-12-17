@@ -1,0 +1,46 @@
+[
+  {
+    "id": "sku-001",
+    "title": "Wireless Headphones",
+    "description": "Comfortable over‑ear headphones with noise reduction.",
+    "price": 89.99,
+    "category": "Electronics",
+    "tags": ["audio", "wireless", "bluetooth"],
+    "image": "images/headphones.jpg",
+    "imageWebp": "images/headphones.webp",
+    "imageAlt": "Black wireless headphones on a desk"
+  },
+  {
+    "id": "sku-002",
+    "title": "Ceramic Coffee Mug",
+    "description": "Matte finish, 350ml capacity, dishwasher safe.",
+    "price": 12.5,
+    "category": "Home",
+    "tags": ["kitchen", "coffee", "mug"],
+    "image": "images/mug.jpg",
+    "imageWebp": "images/mug.webp",
+    "imageAlt": "White ceramic mug on a wooden table"
+  },
+  {
+    "id": "sku-003",
+    "title": "Smart LED Bulb",
+    "description": "Energy‑efficient bulb with app control and color modes.",
+    "price": 19.99,
+    "category": "Home",
+    "tags": ["lighting", "smart", "energy"],
+    "image": "images/bulb.jpg",
+    "imageWebp": "images/bulb.webp",
+    "imageAlt": "Smart LED bulb glowing in a lamp"
+  },
+  {
+    "id": "sku-004",
+    "title": "Travel Backpack",
+    "description": "20L minimalist backpack with water‑resistant fabric.",
+    "price": 49.0,
+    "category": "Accessories",
+    "tags": ["bag", "travel", "outdoor"],
+    "image": "images/backpack.jpg",
+    "imageWebp": "images/backpack.webp",
+    "imageAlt": "Gray backpack leaning against a wall"
+  }
+]
