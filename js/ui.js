@@ -1,177 +1,207 @@
-// findit/js/ui.js
-import { I18n } from './i18n.js';
+import { i18nT } from './i18n.js';
 
-export const UI = (() => {
-  const els = {
-    tabs: document.querySelectorAll('.tab'),
-    tabBtns: document.querySelectorAll('.tab-btn'),
-    grid: document.getElementById('catalogGrid'),
-    empty: document.getElementById('emptyState'),
-    search: document.getElementById('searchInput'),
-    modal: document.getElementById('imageModal'),
-    modalImg: document.getElementById('modalImage'),
-    closeModal: document.getElementById('closeModal'),
-    year: document.getElementById('year'),
-    themeToggle: document.getElementById('themeToggle'),
-    settingsTheme: document.getElementById('settingsTheme'),
-    langSelect: document.getElementById('langSelect'),
-    settingsLang: document.getElementById('settingsLang'),
-    installBtn: document.getElementById('installBtn')
-  };
+let touchStartX = 0;
+let touchEndX = 0;
+let activeView = 'catalog';
 
-  let beforeInstallPrompt = null;
-
-  function initTabs() {
-    els.tabBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const tabId = btn.dataset.tab;
-        els.tabBtns.forEach((b) => b.classList.toggle('active', b === btn));
-        els.tabs.forEach((t) => t.classList.toggle('active', t.id === tabId));
-      });
-    });
-  }
-
-  function renderGrid(items) {
-    const q = (els.search.value || '').toLowerCase();
-    const filtered = items.filter((it) => (it.title || '').toLowerCase().includes(q));
-    els.grid.innerHTML = '';
-    if (filtered.length === 0) {
-      els.empty.hidden = false;
-      return;
+function showPanel(id) {
+  document.querySelectorAll('main > section, .panel').forEach((s) => {
+    if (s.id === id) {
+      s.hidden = false;
+    } else {
+      s.hidden = true;
     }
-    els.empty.hidden = true;
-    filtered.forEach((item) => {
-      const card = document.createElement('div');
-      card.className = 'card catalog-item';
-      card.innerHTML = `
-        <img class="thumb" src="${item.image || ''}" alt="${item.title || ''}" />
-        <div class="title">${item.title || ''}</div>
-        <div class="desc">${item.description || ''}</div>
-        <div class="row">
-          <div class="muted">#${item.id ?? ''}</div>
-          <div class="actions">
-            <button class="btn" data-action="edit">Edit</button>
-            <button class="btn danger" data-action="delete">Delete</button>
-          </div>
-        </div>
-      `;
-      const img = card.querySelector('.thumb');
-      img.addEventListener('click', () => openImage(item.image));
-      card.querySelector('[data-action="edit"]').addEventListener('click', () => {
-        const ev = new CustomEvent('ui:edit', { detail: item });
-        window.dispatchEvent(ev);
-      });
-      card.querySelector('[data-action="delete"]').addEventListener('click', () => {
-        const ev = new CustomEvent('ui:delete', { detail: item.id });
-        window.dispatchEvent(ev);
-      });
-      els.grid.appendChild(card);
-    });
+  });
+  activeView = id;
+}
+
+export function uiInitNavigation() {
+  // Hash-based navigation
+  function navigate() {
+    const hash = location.hash.replace('#', '') || 'catalog';
+    if (hash === 'add') showPanel('editor');
+    else if (hash === 'settings') showPanel('settings');
+    else if (hash === 'about') showPanel('about');
+    else showPanel('catalog');
+    updateAriaForView();
+  }
+  window.addEventListener('hashchange', navigate);
+  navigate();
+
+  // Keyboard arrows (left/right switch sections)
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      const order = ['catalog', 'editor', 'settings', 'about'];
+      const idx = order.indexOf(activeView);
+      const next = e.key === 'ArrowRight' ? Math.min(order.length - 1, idx + 1) : Math.max(0, idx - 1);
+      location.hash = `#${order[next]}`;
+    }
+  });
+
+  // Swipe gestures
+  const view = document.getElementById('view');
+  view.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+  view.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const delta = touchEndX - touchStartX;
+    if (Math.abs(delta) > 50) {
+      const order = ['catalog', 'editor', 'settings', 'about'];
+      const idx = order.indexOf(activeView);
+      const next = delta < 0 ? Math.min(order.length - 1, idx + 1) : Math.max(0, idx - 1);
+      location.hash = `#${order[next]}`;
+    }
+  });
+}
+
+function updateAriaForView() {
+  document.querySelectorAll('main > section').forEach((s) => {
+    s.setAttribute('aria-hidden', s.hidden ? 'true' : 'false');
+  });
+}
+
+// Dark mode toggle
+export function uiInitDarkMode() {
+  const key = 'findit-theme';
+  const saved = localStorage.getItem(key) || 'dark';
+  setTheme(saved);
+
+  function setTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(key, theme);
+    const btn = document.getElementById('darkToggle');
+    const icon = document.getElementById('darkIcon');
+    const pressed = theme === 'dark';
+    btn?.setAttribute('aria-pressed', String(pressed));
+    if (icon) icon.textContent = pressed ? '🌙' : '🌞';
   }
 
-  function openImage(src) {
-    if (!src) return;
-    els.modalImg.src = src;
-    els.modal.setAttribute('aria-hidden', 'false');
-  }
+  document.getElementById('darkToggle')?.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme || 'dark';
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  });
 
-  function closeImage() {
-    els.modal.setAttribute('aria-hidden', 'true');
-    els.modalImg.src = '';
-  }
+  document.getElementById('settingsDarkToggle')?.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme || 'dark';
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  });
+}
 
-  function initModal() {
-    els.closeModal.addEventListener('click', closeImage);
-    els.modal.addEventListener('click', (e) => {
-      if (e.target.classList.contains('modal-backdrop')) closeImage();
-    });
-  }
+// Catalog render helpers
+export function renderCatalog(items, onEdit, onDelete, onView) {
+  const grid = document.getElementById('catalogGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
 
-  // Swipe + arrows navigation between catalog items
-  function initNavigation() {
-    let startX = null;
-    els.grid.addEventListener('touchstart', (e) => {
-      startX = e.changedTouches[0].clientX;
-    });
-    els.grid.addEventListener('touchend', (e) => {
-      if (startX == null) return;
-      const dx = e.changedTouches[0].clientX - startX;
-      if (Math.abs(dx) > 50) {
-        const ev = new CustomEvent(dx > 0 ? 'ui:swipeRight' : 'ui:swipeLeft');
-        window.dispatchEvent(ev);
-      }
-      startX = null;
-    });
-    els.grid.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') window.dispatchEvent(new CustomEvent('ui:swipeRight'));
-      if (e.key === 'ArrowLeft') window.dispatchEvent(new CustomEvent('ui:swipeLeft'));
-    });
+  if (!items || items.length === 0) {
+    empty.hidden = false;
+    return;
   }
+  empty.hidden = true;
 
-  function setYear() {
-    els.year.textContent = new Date().getFullYear();
-  }
+  const frag = document.createDocumentFragment();
+  items.forEach((item) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', item.title);
 
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-  }
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = item.title || '';
+    img.src = item.image || '';
+    img.addEventListener('click', () => onView(item));
+    card.appendChild(img);
 
-  function initTheme(onToggle) {
-    els.themeToggle.addEventListener('click', () => onToggle());
-    els.settingsTheme.addEventListener('click', () => onToggle());
-  }
+    const body = document.createElement('div');
+    body.className = 'card-body';
 
-  function initLang(onChange) {
-    const set = (val) => {
-      els.langSelect.value = val;
-      els.settingsLang.value = val;
-    };
-    els.langSelect.addEventListener('change', (e) => onChange(e.target.value));
-    els.settingsLang.addEventListener('change', (e) => onChange(e.target.value));
-    return { set };
-  }
+    const title = document.createElement('h3');
+    title.textContent = item.title;
+    body.appendChild(title);
 
-  function initSearch(onSearch) {
-    els.search.addEventListener('input', () => onSearch(els.search.value));
-  }
+    const desc = document.createElement('p');
+    desc.textContent = item.description || '';
+    body.appendChild(desc);
 
-  function initInstall() {
-    window.addEventListener('beforeinstallprompt', (e) => {
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'link-btn';
+    editBtn.textContent = i18nT('edit');
+    editBtn.addEventListener('click', () => onEdit(item));
+    actions.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'danger-btn';
+    delBtn.textContent = i18nT('delete');
+    delBtn.addEventListener('click', () => onDelete(item.id));
+    actions.appendChild(delBtn);
+
+    body.appendChild(actions);
+    card.appendChild(body);
+    frag.appendChild(card);
+  });
+
+  grid.appendChild(frag);
+}
+
+// Image viewer with pinch and double-tap zoom
+export function viewerInit() {
+  const overlay = document.getElementById('viewerOverlay');
+  const inner = document.getElementById('viewerInner');
+  const img = document.getElementById('viewerImg');
+  const close = document.getElementById('viewerClose');
+
+  let scale = 1;
+  let lastTap = 0;
+
+  close.addEventListener('click', () => {
+    overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
+    img.src = '';
+    scale = 1;
+    inner.style.transform = 'scale(1)';
+  });
+
+  inner.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      const [t1, t2] = e.touches;
+      inner.dataset.initialDist = Math.hypot(t2.pageX - t1.pageX, t2.pageY - t1.pageY);
+    }
+  });
+
+  inner.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      const [t1, t2] = e.touches;
+      const dist = Math.hypot(t2.pageX - t1.pageX, t2.pageY - t1.pageY);
+      const initial = Number(inner.dataset.initialDist || dist);
+      const factor = dist / initial;
+      scale = Math.min(4, Math.max(1, scale * factor));
+      inner.style.transform = `scale(${scale})`;
       e.preventDefault();
-      beforeInstallPrompt = e;
-      els.installBtn.style.display = 'inline-flex';
-    });
-    els.installBtn.addEventListener('click', async () => {
-      if (!beforeInstallPrompt) return;
-      beforeInstallPrompt.prompt();
-      const choice = await beforeInstallPrompt.userChoice;
-      beforeInstallPrompt = null;
-      if (choice.outcome !== 'accepted') {
-        // do nothing
-      }
-    });
-    window.addEventListener('appinstalled', () => {
-      els.installBtn.style.display = 'none';
-    });
-  }
+    }
+  }, { passive: false });
 
-  function updateTexts() {
-    I18n.applyToDocument();
-    // Update placeholder
-    I18n.applyPlaceholder(els.search, 'search_placeholder');
-  }
+  inner.addEventListener('click', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      scale = scale >= 2 ? 1 : 2;
+      inner.style.transform = `scale(${scale})`;
+    }
+    lastTap = now;
+  });
 
   return {
-    initTabs,
-    renderGrid,
-    initModal,
-    initNavigation,
-    setYear,
-    applyTheme,
-    initTheme,
-    initLang,
-    initSearch,
-    initInstall,
-    updateTexts
+    open(src, alt = '') {
+      img.src = src;
+      img.alt = alt;
+      overlay.hidden = false;
+      overlay.setAttribute('aria-hidden', 'false');
+      inner.style.transform = 'scale(1)';
+      scale = 1;
+    }
   };
-})();
+}
