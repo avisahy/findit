@@ -19,55 +19,66 @@ findit/
 
 
 
-📱 PWA Responsive Native App Specification
+📱 PWA Responsive Native App — Final Specification Prompt
 🔹 General
 Progressive Web App (PWA) with responsive design
 
 Runs natively across Desktop, Android, iOS
 
-Hosted on GitHub Pages at avisahy.github.io/findit
+Hosted on GitHub Pages → avisahy.github.io/findit
 
-Built with HTML, CSS, JavaScript only (no frameworks required unless optional)
+Built with HTML, CSS, JavaScript only (frameworks optional, not required)
 
 🎨 User Interface
-Modern 3D‑style GUI with smooth animations
+Modern GUI: Neumorphism / CSS 3D transforms with lightweight animations (target 60fps)
 
-Dark mode toggle (sun 🌞 / moon 🌙 icons)
+Dark mode toggle with 🌞 / 🌙 icons
 
-Website name in top corner → links back to main page
+Header branding: app name in top corner → links back to main page
 
-Swipe gestures (left/right) and keyboard arrows for navigation
+Navigation: swipe gestures (left/right), keyboard arrows, and touch support
 
-Full‑screen picture preview with zoom support
+Full‑screen image preview with pinch‑to‑zoom and double‑tap zoom
 
 🌍 Languages
-English / Hebrew toggle for full localization
+Localization toggle: English ↔ Hebrew
+
+All UI text, buttons, and error messages fully translated
 
 ⚙️ Core Features
-Catalog items with pictures (add, edit, delete)
+Catalog management: add, edit, delete items with pictures
 
-Image selection from gallery or take picture with camera
+Image input: select from gallery or capture via camera API
 
-Export / Import catalog data (JSON/CSV)
+Data portability: export/import catalog in JSON + CSV formats with schema validation
 
-Full reset option → clears all data as if first login
+Reset option: clears all local data → fresh state
 
-Local database with no storage limit (IndexedDB or similar)
+Offline storage: IndexedDB preferred (large capacity within browser quota), fallback to localStorage
 
 📑 Pages
-About page
+About page: app description + version info
 
-Settings page
+Settings page: language toggle, dark mode, reset, import/export
 
-Add / Edit item page
+Add/Edit item page: form with image upload, text fields, validation
 
 🛠️ Technical Notes
-Use IndexedDB or localStorage for offline catalog storage
+PWA installability:
 
-Ensure installability as a PWA (manifest + service worker)
+Manifest with app name, icons (192px, 512px), theme color, start URL
 
-Responsive layout with flexbox / grid
+Service worker with cache strategies:
 
-Optimize for touch + desktop input
+Cache‑first for static assets (CSS, JS, icons)
 
-GitHub Actions or Pages for deployment
+Network‑first for catalog data
+
+Responsive layout: flexbox + CSS grid, optimized for mobile and desktop
+
+Accessibility: WCAG 2.1 AA compliance, ARIA roles, keyboard navigation, high‑contrast mode
+
+Performance: lazy‑load images, minimize bundle size, target <100ms input response
+
+CI/CD: GitHub Actions → lint, test, auto‑deploy to GitHub Pages
+
