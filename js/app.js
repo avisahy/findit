@@ -225,3 +225,6 @@ function navigate(delta) {
 }
 
 window.addEventListener('DOMContentLoaded', init);
+
+document.documentElement.setAttribute('data-theme', 'dark'); // or 'light'
+
