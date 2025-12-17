@@ -29,6 +29,7 @@ const STORAGE_KEY = 'itemCatalog.v1';
 const THEME_KEY = 'itemCatalog.theme';
 const QUEUE_KEY = 'itemCatalog.queue';
 
+/* ---------- Storage ---------- */
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items)); }
 function load() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -40,6 +41,7 @@ function load() {
 }
 function saveQueue() { localStorage.setItem(QUEUE_KEY, JSON.stringify(state.pendingQueue)); }
 
+/* ---------- Theme ---------- */
 function setTheme(dark) {
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   els.darkToggle.setAttribute('aria-pressed', String(dark));
@@ -47,7 +49,7 @@ function setTheme(dark) {
   localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
 }
 
-/* Canvas thumbnail compression */
+/* ---------- Image compression ---------- */
 async function compressImageToDataUrl(file, maxW = 800, maxH = 800, quality = 0.7) {
   if (!file) return '';
   const img = document.createElement('img');
@@ -73,7 +75,7 @@ async function compressImageToDataUrl(file, maxW = 800, maxH = 800, quality = 0.
   return canvas.toDataURL('image/jpeg', quality);
 }
 
-/* Render items */
+/* ---------- Render items ---------- */
 function render() {
   const { items } = state;
   els.grid.innerHTML = '';
@@ -135,7 +137,7 @@ function render() {
   els.grid.setAttribute('aria-busy', 'false');
 }
 
-/* Reorder logic */
+/* ---------- Reorder ---------- */
 function reorderItems(fromId, toId) {
   if (!fromId || !toId || fromId === toId) return;
   const list = state.items.slice();
@@ -149,7 +151,7 @@ function reorderItems(fromId, toId) {
   render();
 }
 
-/* Export */
+/* ---------- Export ---------- */
 function exportJSON() {
   const blob = new Blob([JSON.stringify(state.items, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -172,7 +174,7 @@ function triggerDownload(url, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-/* Import */
+/* ---------- Import ---------- */
 els.importBtn.addEventListener('click', () => els.importFile.click());
 els.importFile.addEventListener('change', async (e) => {
   const file = e.target.files[0];
@@ -198,7 +200,7 @@ function parseCSV(text) {
   });
 }
 
-/* Notifications */
+/* ---------- Notifications ---------- */
 async function requestNotifications() {
   try {
     const perm = await Notification.requestPermission();
@@ -222,7 +224,7 @@ function scheduleReminder() {
   }, 1000 * 60 * 30); // 30 minutes
 }
 
-/* Connectivity */
+/* ---------- Connectivity ---------- */
 function onOnline() {
   if (state.pendingQueue.length) {
     state.items = [...state.items, ...state.pendingQueue];
@@ -233,7 +235,7 @@ function onOnline() {
 }
 function onOffline() {}
 
-/* Form handling */
+/* ---------- Form handling ---------- */
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const title = els.title.value.trim();
@@ -273,20 +275,20 @@ els.form.addEventListener('submit', async (e) => {
   render();
 });
 
-/* Theme toggle */
+/* ---------- Theme toggle ---------- */
 els.darkToggle.addEventListener('click', () => {
   state.dark = !state.dark;
   setTheme(state.dark);
 });
 
-/* Notifications */
+/* ---------- Notifications ---------- */
 els.notifyBtn.addEventListener('click', requestNotifications);
 
-/* Export buttons */
+/* ---------- Export buttons ---------- */
 els.exportJsonBtn.addEventListener('click', exportJSON);
 els.exportCsvBtn.addEventListener('click', exportCSV);
 
-/* Install prompt */
+/* ---------- Install prompt ---------- */
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -301,11 +303,24 @@ els.installBtn.addEventListener('click', () => {
   }
 });
 
-/* Connectivity listeners */
+/* ---------- Connectivity listeners ---------- */
 window.addEventListener('online', onOnline);
 window.addEventListener('offline', onOffline);
 
-/* Init */
+/* ---------- Tabs navigation ---------- */
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
+
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabButtons.forEach(b => b.classList.remove('active'));
+    tabPanels.forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------- Init ---------- */
 function init() {
   load();
   setTheme(state.dark);
