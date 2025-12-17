@@ -1,110 +1,77 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FindIt – Catalog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#18181f">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="assets/icons/icon-192.svg">
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/dark.css" id="dark-theme-link">
-  <link rel="stylesheet" href="styles/responsive.css">
-  <script>
-    // Minimal inline script to avoid FOUC for theme and language
-    (function () {
-      const theme = localStorage.getItem('findit-theme') || 'auto';
-      const darkLink = document.getElementById('dark-theme-link');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const enableDark = theme === 'dark' || (theme === 'auto' && prefersDark);
-      if (!enableDark && darkLink) darkLink.disabled = true;
 
-      const lang = localStorage.getItem('findit-lang') || 'en';
-      document.documentElement.lang = lang;
-      document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-    }());
-  </script>
+  <!-- App theme -->
+  <meta name="theme-color" content="#0f172a" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Icons (favicons / app icons) -->
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Progressive enhancement: basic styles load first; JS enhances features -->
 </head>
-<body data-page="index">
-  <a href="#main" class="skip-link">Skip to main content</a>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
 
   <header class="app-header" role="banner">
-    <div class="header-left">
-      <button class="icon-button" id="menu-button" aria-label="Open menu">
-        ☰
-      </button>
-      <h1 id="app-title" data-i18n="app.title">FindIt</h1>
+    <div class="header-inner">
+      <h1 aria-label="FindIt catalog">FindIt</h1>
+      <button id="installBtn" class="btn btn-outline" aria-label="Install app" hidden>Install</button>
     </div>
-    <nav class="header-nav" aria-label="Primary">
-      <a href="index.html" class="nav-link nav-link-active" data-i18n="nav.home">Home</a>
-      <a href="item.html" class="nav-link" data-i18n="nav.addItem">Add item</a>
-      <a href="about.html" class="nav-link" data-i18n="nav.about">About</a>
-      <a href="settings.html" class="nav-link" data-i18n="nav.settings">Settings</a>
-    </nav>
   </header>
 
-  <main id="main" class="app-main" role="main">
-    <section class="toolbar" aria-label="Catalog tools">
-      <div class="toolbar-group">
-        <label for="search-input" class="visually-hidden" data-i18n="catalog.searchLabel">Search items</label>
-        <input id="search-input" class="text-input" type="search" autocomplete="off"
-               placeholder="Search…" data-i18n-placeholder="catalog.searchPlaceholder">
-      </div>
-      <div class="toolbar-group">
-        <label for="tag-filter" class="visually-hidden" data-i18n="catalog.tagFilterLabel">Filter by tag</label>
-        <select id="tag-filter" class="select-input">
-          <option value="" data-i18n="catalog.allTags">All tags</option>
+  <main id="main" class="container" role="main">
+    <section class="controls" aria-label="Catalog controls">
+      <div class="control-row">
+        <label for="search" class="visually-hidden">Search items</label>
+        <input
+          id="search"
+          type="search"
+          inputmode="search"
+          placeholder="Search items…"
+          aria-label="Search items"
+        />
+
+        <label for="category" class="visually-hidden">Filter by category</label>
+        <select id="category" aria-label="Filter by category">
+          <option value="">All categories</option>
+          <!-- categories populated dynamically -->
         </select>
-      </div>
-      <div class="toolbar-group toolbar-group-right">
-        <button id="import-json-button" class="primary-button" type="button" data-i18n="catalog.importJson">
-          Import JSON
-        </button>
-        <button id="export-json-button" class="secondary-button" type="button" data-i18n="catalog.exportJson">
-          Export JSON
-        </button>
-        <button id="import-csv-button" class="primary-button" type="button" data-i18n="catalog.importCsv">
-          Import CSV
-        </button>
-        <button id="export-csv-button" class="secondary-button" type="button" data-i18n="catalog.exportCsv">
-          Export CSV
-        </button>
-        <input id="file-input" type="file" accept=".json,.csv" hidden aria-hidden="true">
+
+        <label class="toggle">
+          <input id="favoritesOnly" type="checkbox" />
+          <span>Favorites only</span>
+        </label>
+
+        <button id="resetFilters" class="btn btn-outline" aria-label="Reset filters">Reset</button>
       </div>
     </section>
 
-    <section aria-label="Catalog list" class="catalog-section">
-      <div id="empty-state" class="empty-state" hidden>
-        <p data-i18n="catalog.empty">No items yet. Add your first item to start organizing.</p>
-        <a href="item.html" class="primary-button" data-i18n="catalog.addFirst">Add first item</a>
-      </div>
+    <section id="status" class="status" aria-live="polite"></section>
 
-      <div id="catalog-grid" class="catalog-grid" role="list" aria-live="polite" aria-busy="false">
-        <!-- Items rendered by JS -->
-      </div>
+    <section id="grid" class="grid" aria-label="Catalog items" role="list">
+      <!-- cards injected here -->
+      <noscript>
+        <p>Enable JavaScript to view the catalog.</p>
+      </noscript>
     </section>
   </main>
 
   <footer class="app-footer" role="contentinfo">
-    <p class="footer-text">
-      <span data-i18n="app.footer">FindIt – local, private catalog stored in your browser.</span>
-    </p>
+    <p>© <span id="year"></span> FindIt · Works offline · Installable PWA</p>
   </footer>
 
-  <div id="image-viewer" class="image-viewer" aria-hidden="true" aria-modal="true" role="dialog">
-    <div class="image-viewer-backdrop" id="image-viewer-backdrop"></div>
-    <div class="image-viewer-content" role="document">
-      <button class="icon-button close-button" id="image-viewer-close" aria-label="Close image viewer">✕</button>
-      <img id="image-viewer-img" alt="">
-    </div>
-  </div>
-
-  <script src="scripts/i18n.js" defer></script>
-  <script src="scripts/db.js" defer></script>
-  <script src="scripts/gestures.js" defer></script>
-  <script src="scripts/ui.js" defer></script>
-  <script src="scripts/app.js" defer></script>
-  <script src="scripts/sw-register.js" defer></script>
+  <!-- App scripts -->
+  <script src="app.js" defer></script>
 </body>
 </html>
