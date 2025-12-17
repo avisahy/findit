@@ -1,12 +1,10 @@
-/* Item Catalog PWA - Vanilla JS */
+/* FindIt Catalog PWA - Vanilla JS */
 
 const state = {
-  items: [], // {id, title, description, category, thumbDataUrl}
-  filterText: '',
-  filterCategory: '',
+  items: [],
   dark: false,
   draggingId: null,
-  pendingQueue: [] // for simple "sync when online" demo
+  pendingQueue: []
 };
 
 const els = {
@@ -17,41 +15,35 @@ const els = {
   imageInput: document.getElementById('imageInput'),
   grid: document.getElementById('itemsGrid'),
   empty: document.getElementById('emptyState'),
-  searchInput: document.getElementById('searchInput'),
-  categoryFilter: document.getElementById('categoryFilter'),
   darkToggle: document.getElementById('darkToggle'),
   notifyBtn: document.getElementById('notifyBtn'),
   exportJsonBtn: document.getElementById('exportJsonBtn'),
   exportCsvBtn: document.getElementById('exportCsvBtn'),
+  importBtn: document.getElementById('importBtn'),
+  importFile: document.getElementById('importFile'),
+  installBtn: document.getElementById('installBtn'),
   template: document.getElementById('itemCardTemplate')
 };
 
-// Storage helpers (localStorage for simplicity)
 const STORAGE_KEY = 'itemCatalog.v1';
 const THEME_KEY = 'itemCatalog.theme';
 const QUEUE_KEY = 'itemCatalog.queue';
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
-}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items)); }
 function load() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    try { state.items = JSON.parse(raw) || []; } catch {}
-  }
+  if (raw) { try { state.items = JSON.parse(raw) || []; } catch {} }
   const themeRaw = localStorage.getItem(THEME_KEY);
   if (themeRaw) state.dark = themeRaw === 'dark';
   const qRaw = localStorage.getItem(QUEUE_KEY);
   if (qRaw) { try { state.pendingQueue = JSON.parse(qRaw) || []; } catch {} }
 }
-function saveQueue() {
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(state.pendingQueue));
-}
+function saveQueue() { localStorage.setItem(QUEUE_KEY, JSON.stringify(state.pendingQueue)); }
 
 function setTheme(dark) {
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   els.darkToggle.setAttribute('aria-pressed', String(dark));
-  els.darkToggle.textContent = dark ? 'Light' : 'Dark';
+  els.darkToggle.textContent = dark ? '☀️' : '🌙';
   localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
 }
 
@@ -83,34 +75,24 @@ async function compressImageToDataUrl(file, maxW = 800, maxH = 800, quality = 0.
 
 /* Render items */
 function render() {
-  const { items, filterText, filterCategory } = state;
-  let filtered = items.filter(i => {
-    const textMatch =
-      !filterText ||
-      i.title.toLowerCase().includes(filterText) ||
-      i.description.toLowerCase().includes(filterText);
-    const catMatch = !filterCategory || i.category === filterCategory;
-    return textMatch && catMatch;
-  });
-
+  const { items } = state;
   els.grid.innerHTML = '';
   els.grid.setAttribute('aria-busy', 'true');
 
-  if (filtered.length === 0) {
+  if (items.length === 0) {
     els.empty.hidden = false;
     els.grid.setAttribute('aria-busy', 'false');
     return;
   }
   els.empty.hidden = true;
 
-  filtered.forEach(item => {
+  items.forEach(item => {
     const node = els.template.content.firstElementChild.cloneNode(true);
     const img = node.querySelector('.thumb');
     const t = node.querySelector('.card-title');
     const d = node.querySelector('.card-desc');
     const c = node.querySelector('.card-cat');
     const del = node.querySelector('.delete-btn');
-    const handle = node.querySelector('.move-handle');
 
     img.src = item.thumbDataUrl || '';
     img.alt = item.title ? `Image of ${item.title}` : 'Item image';
@@ -141,18 +123,6 @@ function render() {
       reorderItems(fromId, toId);
     });
 
-    // Keyboard reorder: use Enter with focus on handle to move above
-    handle.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const idx = state.items.findIndex(i => i.id === item.id);
-        if (idx > 0) {
-          const fromId = item.id;
-          const toId = state.items[idx - 1].id;
-          reorderItems(fromId, toId);
-        }
-      }
-    });
-
     del.addEventListener('click', () => {
       state.items = state.items.filter(i => i.id !== item.id);
       save();
@@ -165,14 +135,13 @@ function render() {
   els.grid.setAttribute('aria-busy', 'false');
 }
 
-/* Reorder logic: move dragged item before target */
+/* Reorder logic */
 function reorderItems(fromId, toId) {
   if (!fromId || !toId || fromId === toId) return;
   const list = state.items.slice();
   const fromIdx = list.findIndex(i => i.id === fromId);
   const toIdx = list.findIndex(i => i.id === toId);
   if (fromIdx === -1 || toIdx === -1) return;
-
   const [moved] = list.splice(fromIdx, 1);
   list.splice(toIdx, 0, moved);
   state.items = list;
@@ -203,6 +172,32 @@ function triggerDownload(url, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
+/* Import */
+els.importBtn.addEventListener('click', () => els.importFile.click());
+els.importFile.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  try {
+    const data = file.name.endsWith('.csv') ? parseCSV(text) : JSON.parse(text);
+    state.items = data;
+    save();
+    render();
+  } catch {
+    alert('Invalid file format');
+  }
+});
+function parseCSV(text) {
+  const [headerLine, ...lines] = text.trim().split('\n');
+  const headers = headerLine.split(',');
+  return lines.map(line => {
+    const values = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = values[i]);
+    return obj;
+  });
+}
+
 /* Notifications */
 async function requestNotifications() {
   try {
@@ -214,12 +209,9 @@ async function requestNotifications() {
       });
       scheduleReminder();
     }
-  } catch (e) {
-    console.warn('Notifications error', e);
-  }
+  } catch (e) { console.warn('Notifications error', e); }
 }
 function scheduleReminder() {
-  // Simple in-session reminder (not background push). For true Push, use Push API and server.
   setTimeout(() => {
     if (document.visibilityState === 'visible' && 'Notification' in window && Notification.permission === 'granted') {
       new Notification('Time to update your catalog', {
@@ -230,9 +222,8 @@ function scheduleReminder() {
   }, 1000 * 60 * 30); // 30 minutes
 }
 
-/* Connectivity + "sync when online" */
+/* Connectivity */
 function onOnline() {
-  // Demo: flush pendingQueue (e.g., unsent items). Here we just move them into items if any.
   if (state.pendingQueue.length) {
     state.items = [...state.items, ...state.pendingQueue];
     state.pendingQueue = [];
@@ -240,16 +231,14 @@ function onOnline() {
     render();
   }
 }
-function onOffline() {
-  // No-op: app works offline via service worker cache
-}
+function onOffline() {}
 
 /* Form handling */
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const title = els.title.value.trim();
   const description = els.description.value.trim();
-  const category = els.category.value;
+  const category = els.category.value.trim();
 
   if (!title || !category) {
     alert('Please provide title and category.');
@@ -266,12 +255,13 @@ els.form.addEventListener('submit', async (e) => {
 
   const item = {
     id: crypto.randomUUID(),
-    title, description, category,
+    title,
+    description,
+    category,
     thumbDataUrl
   };
 
   if (!navigator.onLine) {
-    // queue while offline
     state.pendingQueue.push(item);
     saveQueue();
   } else {
@@ -280,16 +270,6 @@ els.form.addEventListener('submit', async (e) => {
   }
 
   els.form.reset();
-  render();
-});
-
-/* Filters */
-els.searchInput.addEventListener('input', () => {
-  state.filterText = els.searchInput.value.trim().toLowerCase();
-  render();
-});
-els.categoryFilter.addEventListener('change', () => {
-  state.filterCategory = els.categoryFilter.value;
   render();
 });
 
@@ -306,33 +286,30 @@ els.notifyBtn.addEventListener('click', requestNotifications);
 els.exportJsonBtn.addEventListener('click', exportJSON);
 els.exportCsvBtn.addEventListener('click', exportCSV);
 
-/* Keyboard navigation enhancements */
-els.grid.addEventListener('keydown', (e) => {
-  const cards = Array.from(els.grid.querySelectorAll('.card'));
-  const idx = cards.indexOf(document.activeElement);
-  if (idx === -1) return;
-  if (e.key === 'ArrowRight') cards[Math.min(idx + 1, cards.length - 1)].focus();
-  if (e.key === 'ArrowLeft') cards[Math.max(idx - 1, 0)].focus();
-  if (e.key === 'Delete') {
-    const id = document.activeElement.dataset.id;
-    state.items = state.items.filter(i => i.id !== id);
-    save(); render();
+/* Install prompt */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+els.installBtn.addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(() => deferredPrompt = null);
+  } else {
+    alert('Install prompt not available. Use browser menu.');
   }
 });
+
+/* Connectivity listeners */
+window.addEventListener('online', onOnline);
+window.addEventListener('offline', onOffline);
 
 /* Init */
 function init() {
   load();
   setTheme(state.dark);
-  state.filterText = '';
-  state.filterCategory = '';
   render();
-
-  window.addEventListener('online', onOnline);
-  window.addEventListener('offline', onOffline);
-
-  // Periodic reminder each session
   if ('Notification' in window && Notification.permission === 'granted') scheduleReminder();
 }
-
 init();
