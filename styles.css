@@ -303,3 +303,21 @@ body {
   display: none !important;
 }
 
+/* TOOLTIP */
+.tooltip {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  padding: .75rem 1.25rem;
+  border-radius: .75rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  font-weight: 600;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.tooltip.show { opacity: 1; }
+
