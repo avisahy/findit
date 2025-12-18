@@ -182,6 +182,9 @@ function enterEditMode(card, item) {
   const body = card.querySelector('.card-body');
   const actions = card.querySelector('.card-actions');
 
+  // ✅ keep a copy of the original image
+  const originalImage = item.thumbDataUrl;
+
   body.innerHTML = `
     <input class="inline-input" id="edit-title" value="${item.title}">
     <textarea class="inline-textarea" id="edit-desc">${item.description}</textarea>
@@ -249,6 +252,10 @@ function enterEditMode(card, item) {
   // Cancel
   actions.querySelector('#cancelEditBtn').addEventListener('click', (e) => {
     e.preventDefault();
+
+    // ✅ restore original image
+    item.thumbDataUrl = originalImage;
+
     render();
   });
 }
@@ -271,25 +278,24 @@ els.form.addEventListener('submit', async (e) => {
   if (file) thumbDataUrl = await compressImageToDataUrl(file);
 
   const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
+if (!navigator.onLine) {
+  state.pendingQueue.push(item);
+  saveQueue();
+} else {
+  state.items.push(item);
+  save();
+}
 
-  if (!navigator.onLine) {
-    state.pendingQueue.push(item);
-    saveQueue();
-  } else {
-    state.items.push(item);
-    save();
-  }
+els.form.reset();
+render();
 
-    els.form.reset();
-  render();
-
-  // ✅ Tooltip after adding item
-  els.tooltip.hidden = false;
-  els.tooltip.classList.add('show');
-  setTimeout(() => {
-    els.tooltip.classList.remove('show');
-    els.tooltip.hidden = true;
-  }, 5000);
+// ✅ Tooltip after adding item
+els.tooltip.hidden = false;
+els.tooltip.classList.add('show');
+setTimeout(() => {
+  els.tooltip.classList.remove('show');
+  els.tooltip.hidden = true;
+}, 5000);
 });
 
 /* ---------- EXPORT ---------- */
@@ -441,3 +447,4 @@ function init() {
   }
 }
 init();
+
