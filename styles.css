@@ -270,7 +270,7 @@ body {
     flex-direction: column;
     align-items: center;
   }
-  .settings-actions .btn {
+    .settings-actions .btn {
     width: 100%;
     max-width: 260px;
     text-align: center;
@@ -292,15 +292,17 @@ body {
   z-index: 50;
 }
 
+/* ✅ Ensure modal is hidden properly */
+.modal[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 .modal img {
   max-width: 90%;
   max-height: 90%;
   border-radius: 1rem;
   box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-}
-
-.modal[hidden] {
-  display: none !important;
 }
 
 /* TOOLTIP */
@@ -319,5 +321,7 @@ body {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
-.tooltip.show { opacity: 1; }
 
+.tooltip.show {
+  opacity: 1;
+}
