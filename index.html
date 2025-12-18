@@ -79,20 +79,22 @@
   </footer>
 
   <!-- ITEM TEMPLATE -->
-  <template id="itemCardTemplate">
-    <article class="card" role="listitem" tabindex="0">
-      <div class="thumb-wrap"><img class="thumb" alt="" /></div>
-      <div class="card-body">
-        <h3 class="card-title"></h3>
-        <p class="card-desc"></p>
-        <p class="card-cat"></p>
-      </div>
-      <div class="card-actions">
-        <button class="btn small edit-btn">Edit</button>
-        <button class="btn small delete-btn">Delete</button>
-      </div>
-    </article>
-  </template>
+<template id="itemCardTemplate">
+  <article class="card" role="listitem" tabindex="0">
+    <div class="thumb-wrap"><img class="thumb" alt="" /></div>
+    <!-- Details hidden by default -->
+    <div class="card-details" hidden>
+      <h3 class="card-title"></h3>
+      <p class="card-desc"></p>
+      <p class="card-cat"></p>
+    </div>
+    <div class="card-actions">
+      <button class="btn small edit-btn">Edit Details</button>
+      <button class="btn small delete-btn">Delete</button>
+    </div>
+  </article>
+</template>
+
 
   <!-- FULLSCREEN IMAGE OVERLAY -->
   <div id="imageOverlay" class="image-overlay" hidden>
