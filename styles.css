@@ -54,7 +54,7 @@ body {
   border-radius: 999px;
   border: 1px solid var(--border);
   box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.1);
-  cursor: pointer;
+  cursor: pointer; /* ✅ pointer cursor for all buttons */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -89,6 +89,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer; /* ✅ ensure icon buttons also show pointer */
 }
 
 /* TABS */
@@ -110,7 +111,7 @@ body {
   background: transparent;
   color: var(--text);
   font-weight: 600;
-  cursor: pointer;
+  cursor: pointer; /* ✅ pointer cursor for tabs */
   transition: all 0.25s ease;
   border-radius: 0.75rem;
   margin: 0.25rem;
@@ -157,6 +158,7 @@ body {
   font-size: 1rem;
   margin-bottom: 1rem;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+  cursor: text; /* ✅ text cursor for search input */
 }
 
 /* FORM */
@@ -177,6 +179,7 @@ body {
   background: var(--surface);
   color: var(--text);
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+  cursor: text; /* ✅ text cursor for inputs/textareas */
 }
 
 .form-actions {
@@ -186,51 +189,12 @@ body {
 }
 
 /* GRID + CARDS */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
-}
-
-.card {
-  background: var(--surface);
-  border-radius: 1.25rem;
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  transform-style: preserve-3d;
-}
-
-.card:hover {
-  transform: rotateY(6deg) rotateX(3deg) translateY(-6px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-}
-
-.thumb-wrap {
-  aspect-ratio: 4 / 3;
-  border-radius: 1.25rem 1.25rem 0 0;
-  overflow: hidden;
-}
-
-.thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: translateZ(20px);
-}
-
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+.card { background: var(--surface); border-radius: 1.25rem; border: 1px solid var(--border); }
+.thumb-wrap { aspect-ratio: 4 / 3; border-radius: 1.25rem 1.25rem 0 0; overflow: hidden; }
+.thumb { width: 100%; height: 100%; object-fit: cover; }
 .card-body { padding: 1rem; }
-.card-title { font-weight: 700; margin-bottom: .5rem; }
-.card-desc { color: var(--muted); margin-bottom: .5rem; }
-.card-cat { font-size: .875rem; color: var(--muted); }
-
-.card-actions {
-  display: flex;
-  justify-content: space-between;
-  padding: .75rem;
-  border-top: 1px solid var(--border);
-}
+.card-actions { display: flex; justify-content: space-between; padding: .75rem; }
 
 /* INLINE EDIT FIELDS */
 .inline-input,
@@ -241,58 +205,25 @@ body {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
   margin-bottom: .5rem;
+  cursor: text; /* ✅ text cursor for inline edit fields */
 }
 
-.inline-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
+.inline-textarea { resize: vertical; min-height: 60px; }
 
 /* EMPTY STATE */
-.empty {
-  text-align: center;
-  color: var(--muted);
-  padding: .5rem;
-}
+.empty { text-align: center; color: var(--muted); padding: .5rem; }
 
 /* SETTINGS */
-.settings-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .75rem;
-}
-
-/* MOBILE SETTINGS LAYOUT */
+.settings-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 @media (max-width: 640px) {
-  .settings-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-    .settings-actions .btn {
-    width: 100%;
-    max-width: 260px;
-    text-align: center;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+  .settings-actions { flex-direction: column; align-items: center; }
+  .settings-actions .btn { width: 100%; max-width: 260px; text-align: center; }
+  .form-row { grid-template-columns: 1fr; }
 }
 
 /* FULLSCREEN IMAGE MODAL */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-/* ✅ Ensure modal is hidden properly */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 50; }
 .modal[hidden] {
   display: none !important;
   pointer-events: none !important;
@@ -303,6 +234,7 @@ body {
   max-height: 90%;
   border-radius: 1rem;
   box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+  cursor: pointer; /* ✅ pointer cursor when clicking image to close modal */
 }
 
 /* TOOLTIP */
