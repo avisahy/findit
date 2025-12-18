@@ -240,10 +240,10 @@ function enterEditMode(card, item) {
     render();
   });
 }
-/* ---------- ADD ITEM FORM ---------- */
+
+/* ADD ITEM FORM */
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const title = els.title.value.trim();
   const description = els.description.value.trim();
   const category = els.category.value.trim();
@@ -255,21 +255,9 @@ els.form.addEventListener('submit', async (e) => {
   }
 
   let thumbDataUrl = "";
-  if (file) {
-    try {
-      thumbDataUrl = await compressImageToDataUrl(file);
-    } catch {
-      thumbDataUrl = "";
-    }
-  }
+  if (file) thumbDataUrl = await compressImageToDataUrl(file);
 
-  const item = {
-    id: crypto.randomUUID(),
-    title,
-    description,
-    category,
-    thumbDataUrl
-  };
+  const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
 
   if (!navigator.onLine) {
     state.pendingQueue.push(item);
@@ -281,13 +269,77 @@ els.form.addEventListener('submit', async (e) => {
 
   els.form.reset();
   render();
+
+  // ✅ Tooltip
+  const tooltip = document.getElementById('tooltip');
+  tooltip.hidden = false;
+  tooltip.classList.add('show');
+  setTimeout(() => {
+    tooltip.classList.remove('show');
+    tooltip.hidden = true;
+  }, 5000);
 });
+
+/* INLINE EDIT MODE FIX */
+function enterEditMode(card, item) {
+  const body = card.querySelector('.card-body');
+  const actions = card.querySelector('.card-actions');
+
+  body.innerHTML = `
+    <input class="inline-input" id="edit-title" value="${item.title}">
+    <textarea class="inline-textarea" id="edit-desc">${item.description}</textarea>
+    <input class="inline-input" id="edit-cat" value="${item.category}">
+    <button class="btn small" id="changeImageBtn">Change Image</button>
+  `;
+
+  actions.innerHTML = `
+    <button class="btn small primary" id="saveEditBtn">Save</button>
+    <button class="btn small" id="cancelEditBtn">Cancel</button>
+    <button class="btn small delete-btn">Delete</button>
+  `;
+
+  // Delete
+  actions.querySelector('.delete-btn').addEventListener('click', () => {
+    state.items = state.items.filter(i => i.id !== item.id);
+    save(); render();
+  });
+
+  // Change Image
+  body.querySelector('#changeImageBtn').addEventListener('click', async () => {
+    const picker = document.createElement('input');
+    picker.type = 'file'; picker.accept = 'image/*';
+    picker.onchange = async () => {
+      const file = picker.files[0];
+      if (file) item.thumbDataUrl = await compressImageToDataUrl(file);
+    };
+    picker.click();
+  });
+
+  // Save
+  actions.querySelector('#saveEditBtn').addEventListener('click', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const newTitle = body.querySelector('#edit-title').value.trim();
+    const newDesc = body.querySelector('#edit-desc').value.trim();
+    const newCat = body.querySelector('#edit-cat').value.trim();
+    if (!newTitle || !newCat) { alert("Title and category are required."); return; }
+        item.title = newTitle;
+    item.description = newDesc;
+    item.category = newCat;
+
+    save();
+    render();
+  });
+
+  // Cancel
+  actions.querySelector('#cancelEditBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    render();
+  });
+}
 
 /* ---------- EXPORT ---------- */
 function exportJSON() {
-  const blob = new Blob([JSON.stringify(state.items, null, 2)], {
-    type: "application/json"
-  });
+  const blob = new Blob([JSON.stringify(state.items, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   triggerDownload(url, "items.json");
 }
@@ -298,7 +350,6 @@ function exportCSV() {
     headers.map(h => `"${String(i[h] ?? "").replaceAll('"', '""')}"`).join(",")
   );
   const csv = [headers.join(","), ...rows].join("\n");
-
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   triggerDownload(url, "items.csv");
@@ -323,9 +374,7 @@ els.importBtn.addEventListener("click", () => els.importFile.click());
 els.importFile.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const text = await file.text();
-
   try {
     let data;
     if (file.name.endsWith(".csv")) {
@@ -333,7 +382,6 @@ els.importFile.addEventListener("change", async (e) => {
     } else {
       data = JSON.parse(text);
     }
-
     state.items = data;
     save();
     render();
@@ -345,7 +393,6 @@ els.importFile.addEventListener("change", async (e) => {
 function parseCSV(text) {
   const [headerLine, ...lines] = text.trim().split("\n");
   const headers = headerLine.split(",");
-
   return lines.map(line => {
     const values = line.split(",");
     const obj = {};
@@ -372,11 +419,9 @@ async function requestNotifications() {
 
 function scheduleReminder() {
   setTimeout(() => {
-    if (
-      document.visibilityState === "visible" &&
-      "Notification" in window &&
-      Notification.permission === "granted"
-    ) {
+    if (document.visibilityState === "visible" &&
+        "Notification" in window &&
+        Notification.permission === "granted") {
       new Notification("Time to update your catalog", {
         body: "Add a new item or review existing ones.",
         icon: "icons/icon-192.png"
@@ -389,12 +434,10 @@ els.notifyBtn.addEventListener("click", requestNotifications);
 
 /* ---------- INSTALL PROMPT ---------- */
 let deferredPrompt = null;
-
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
 });
-
 els.installBtn.addEventListener("click", () => {
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -418,12 +461,10 @@ window.addEventListener("online", () => {
 /* ---------- TABS ---------- */
 const tabButtons = document.querySelectorAll(".tab-btn");
 const tabPanels = document.querySelectorAll(".tab-panel");
-
 tabButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     tabButtons.forEach((b) => b.classList.remove("active"));
     tabPanels.forEach((p) => p.classList.remove("active"));
-
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
   });
@@ -440,10 +481,8 @@ function init() {
   load();
   setTheme(state.dark);
   render();
-
   if ("Notification" in window && Notification.permission === "granted") {
     scheduleReminder();
   }
 }
-
 init();
