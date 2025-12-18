@@ -31,9 +31,6 @@ const els = {
 
   template: document.getElementById('itemCardTemplate'),
 
-  modal: document.getElementById('imageModal'),
-  modalImg: document.getElementById('modalImage'),
-
   tooltip: document.getElementById('tooltip')
 };
 
@@ -143,11 +140,19 @@ function render() {
     d.textContent = item.description;
     c.textContent = item.category;
 
-    /* FULLSCREEN PREVIEW */
+    /* INLINE PREVIEW EXPANSION */
     img.addEventListener('click', () => {
       if (!item.thumbDataUrl) return;
-      els.modalImg.src = item.thumbDataUrl;
-      els.modal.hidden = false;
+      let preview = node.querySelector('.preview');
+      if (!preview) {
+        preview = document.createElement('img');
+        preview.className = 'preview';
+        preview.src = item.thumbDataUrl;
+        preview.alt = item.title;
+        node.querySelector('.card-body').appendChild(preview);
+      } else {
+        preview.remove();
+      }
     });
 
     /* DELETE */
@@ -165,11 +170,6 @@ function render() {
 
   els.grid.setAttribute('aria-busy', 'false');
 }
-
-/* ---------- EXIT IMAGE MODAL ---------- */
-els.modal.addEventListener('click', () => {
-  els.modal.hidden = true;
-});
 
 /* ---------- SEARCH ---------- */
 els.searchInput.addEventListener('input', () => {
@@ -277,25 +277,32 @@ els.form.addEventListener('submit', async (e) => {
   let thumbDataUrl = "";
   if (file) thumbDataUrl = await compressImageToDataUrl(file);
 
-  const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
-if (!navigator.onLine) {
-  state.pendingQueue.push(item);
-  saveQueue();
-} else {
-  state.items.push(item);
-  save();
-}
+    const item = { 
+    id: crypto.randomUUID(), 
+    title, 
+    description, 
+    category, 
+    thumbDataUrl 
+  };
 
-els.form.reset();
-render();
+  if (!navigator.onLine) {
+    state.pendingQueue.push(item);
+    saveQueue();
+  } else {
+    state.items.push(item);
+    save();
+  }
 
-// ✅ Tooltip after adding item
-els.tooltip.hidden = false;
-els.tooltip.classList.add('show');
-setTimeout(() => {
-  els.tooltip.classList.remove('show');
-  els.tooltip.hidden = true;
-}, 5000);
+  els.form.reset();
+  render();
+
+  // ✅ Tooltip after adding item
+  els.tooltip.hidden = false;
+  els.tooltip.classList.add('show');
+  setTimeout(() => {
+    els.tooltip.classList.remove('show');
+    els.tooltip.hidden = true;
+  }, 5000);
 });
 
 /* ---------- EXPORT ---------- */
@@ -447,4 +454,3 @@ function init() {
   }
 }
 init();
-
