@@ -1,4 +1,4 @@
-/* FindIt Catalog PWA - Updated Version */
+/* FindIt Catalog PWA - Fullscreen Overlay Version */
 
 /* ---------- STATE ---------- */
 const state = {
@@ -31,7 +31,10 @@ const els = {
 
   template: document.getElementById('itemCardTemplate'),
 
-  tooltip: document.getElementById('tooltip')
+  tooltip: document.getElementById('tooltip'),
+
+  imageOverlay: document.getElementById('imageOverlay'),
+  overlayImage: document.getElementById('overlayImage')
 };
 
 const STORAGE_KEY = 'itemCatalog.v1';
@@ -140,30 +143,12 @@ function render() {
     d.textContent = item.description;
     c.textContent = item.category;
 
-    /* FLOATING OVERLAY PREVIEW */
-    img.addEventListener('click', (e) => {
+    /* FULLSCREEN OVERLAY PREVIEW */
+    img.addEventListener('click', () => {
       if (!item.thumbDataUrl) return;
-
-      // remove existing overlay
-      document.querySelectorAll('.preview-overlay').forEach(el => el.remove());
-
-      const overlay = document.createElement('div');
-      overlay.className = 'preview-overlay';
-
-      const bigImg = document.createElement('img');
-      bigImg.src = item.thumbDataUrl;
-      bigImg.alt = item.title;
-
-      overlay.appendChild(bigImg);
-      document.body.appendChild(overlay);
-
-      // position near clicked image
-      const rect = e.target.getBoundingClientRect();
-      overlay.style.top = `${rect.bottom + window.scrollY + 5}px`;
-      overlay.style.left = `${rect.left + window.scrollX}px`;
-
-      // close on click
-      overlay.addEventListener('click', () => overlay.remove());
+      els.overlayImage.src = item.thumbDataUrl;
+      els.overlayImage.alt = item.title;
+      els.imageOverlay.hidden = false;
     });
 
     /* DELETE */
@@ -181,6 +166,11 @@ function render() {
 
   els.grid.setAttribute('aria-busy', 'false');
 }
+
+/* ---------- CLOSE OVERLAY ---------- */
+els.imageOverlay.addEventListener('click', () => {
+  els.imageOverlay.hidden = true;
+});
 
 /* ---------- SEARCH ---------- */
 els.searchInput.addEventListener('input', () => {
@@ -292,7 +282,6 @@ els.form.addEventListener('submit', async (e) => {
   els.form.reset();
   render();
 
-  // ✅ Tooltip after adding item
   els.tooltip.hidden = false;
   els.tooltip.classList.add('show');
   setTimeout(() => {
