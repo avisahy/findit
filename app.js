@@ -148,6 +148,8 @@ function render() {
       if (!item.thumbDataUrl) return;
       els.overlayImage.src = item.thumbDataUrl;
       els.overlayImage.alt = item.title;
+      // Position overlay at current scroll 
+      els.imageOverlay.style.top = `${window.scrollY}px`;
       els.imageOverlay.hidden = false;
     });
 
