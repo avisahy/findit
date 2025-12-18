@@ -82,14 +82,6 @@
   <template id="itemCardTemplate">
     <article class="card" role="listitem" tabindex="0">
       <div class="thumb-wrap"><img class="thumb" alt="" /></div>
-
-      <!-- Hidden details (only shown in overlay or edit mode) -->
-      <div class="card-details" hidden>
-        <h3 class="card-title"></h3>
-        <p class="card-desc"></p>
-        <p class="card-cat"></p>
-      </div>
-
       <div class="card-actions">
         <button class="btn small details-btn">Details</button>
         <button class="btn small edit-btn">Edit</button>
@@ -110,6 +102,24 @@
       <p id="overlayDesc"></p>
       <p id="overlayCat"></p>
     </div>
+  </div>
+
+  <!-- FULLSCREEN EDIT OVERLAY -->
+  <div id="editOverlay" class="edit-overlay" hidden>
+    <form id="editForm" class="edit-box">
+      <label>Title <input id="editTitle" type="text"></label>
+      <label>Description <textarea id="editDesc"></textarea></label>
+      <label>Category <input id="editCat" type="text"></label>
+      <div class="edit-image-actions">
+        <button type="button" id="changeImageBtn">Change Image</button>
+        <button type="button" id="removeImageBtn">Remove Image</button>
+      </div>
+      <div class="edit-actions">
+        <button type="submit" id="saveEditBtn">Save</button>
+        <button type="button" id="cancelEditBtn">Cancel</button>
+        <button type="button" id="deleteEditBtn">Delete</button>
+      </div>
+    </form>
   </div>
 
   <!-- TOOLTIP -->
