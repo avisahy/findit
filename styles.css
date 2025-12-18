@@ -214,15 +214,6 @@ body {
 .card-body { padding: 1rem; }
 .card-actions { display: flex; justify-content: space-between; padding: .75rem; }
 
-/* INLINE PREVIEW */
-.preview {
-  display: block;
-  max-width: 100%;
-  border-radius: 1rem;
-  margin-top: 0.75rem;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-}
-
 /* INLINE EDIT FIELDS */
 .inline-input,
 .inline-textarea {
@@ -247,6 +238,22 @@ body {
   .settings-actions { flex-direction: column; align-items: center; }
   .settings-actions .btn { width: 100%; max-width: 260px; text-align: center; }
   .form-row { grid-template-columns: 1fr; }
+}
+
+/* FLOATING OVERLAY PREVIEW */
+.preview-overlay {
+  position: absolute;
+  background: rgba(0,0,0,0.85);
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  z-index: 100;
+}
+.preview-overlay img {
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 0.5rem;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  cursor: pointer;
 }
 
 /* TOOLTIP */
