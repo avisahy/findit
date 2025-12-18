@@ -1,4 +1,4 @@
-/* FindIt Catalog PWA - Fullscreen Overlay Version */
+/* FindIt Catalog PWA - Simplified Card Version */
 
 /* ---------- STATE ---------- */
 const state = {
@@ -45,22 +45,18 @@ const QUEUE_KEY = 'itemCatalog.queue';
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
 }
-
 function load() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
     try { state.items = JSON.parse(raw) || []; } catch {}
   }
-
   const themeRaw = localStorage.getItem(THEME_KEY);
   if (themeRaw) state.dark = themeRaw === 'dark';
-
   const qRaw = localStorage.getItem(QUEUE_KEY);
   if (qRaw) {
     try { state.pendingQueue = JSON.parse(qRaw) || []; } catch {}
   }
 }
-
 function saveQueue() {
   localStorage.setItem(QUEUE_KEY, JSON.stringify(state.pendingQueue));
 }
@@ -76,33 +72,25 @@ function setTheme(dark) {
 /* ---------- IMAGE COMPRESSION ---------- */
 async function compressImageToDataUrl(file, maxW = 800, maxH = 800, quality = 0.7) {
   if (!file) return '';
-
   const img = document.createElement('img');
   const reader = new FileReader();
-
   const loadFile = new Promise((resolve, reject) => {
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
   });
-
   reader.readAsDataURL(file);
   const dataUrl = await loadFile;
-
   img.src = dataUrl;
   await new Promise(res => img.onload = res);
-
   let { width, height } = img;
   const ratio = Math.min(maxW / width, maxH / height, 1);
   const w = Math.round(width * ratio);
   const h = Math.round(height * ratio);
-
   const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
-
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0, w, h);
-
   return canvas.toDataURL('image/jpeg', quality);
 }
 
@@ -123,12 +111,10 @@ function render() {
     els.grid.setAttribute('aria-busy', 'false');
     return;
   }
-
   els.empty.hidden = true;
 
   filtered.forEach(item => {
     const node = els.template.content.firstElementChild.cloneNode(true);
-
     const img = node.querySelector('.thumb');
     const t = node.querySelector('.card-title');
     const d = node.querySelector('.card-desc');
@@ -148,7 +134,6 @@ function render() {
       if (!item.thumbDataUrl) return;
       els.overlayImage.src = item.thumbDataUrl;
       els.overlayImage.alt = item.title;
-      // Position overlay at current scroll 
       els.imageOverlay.style.top = `${window.scrollY}px`;
       els.imageOverlay.hidden = false;
     });
@@ -160,7 +145,7 @@ function render() {
       render();
     });
 
-    /* EDIT */
+    /* EDIT DETAILS */
     edit.addEventListener('click', () => enterEditMode(node, item));
 
     els.grid.appendChild(node);
@@ -182,16 +167,18 @@ els.searchInput.addEventListener('input', () => {
 
 /* ---------- INLINE EDIT MODE ---------- */
 function enterEditMode(card, item) {
-  const body = card.querySelector('.card-body');
+  const details = card.querySelector('.card-details');
   const actions = card.querySelector('.card-actions');
-
+  const thumb = card.querySelector('.thumb');
   const originalImage = item.thumbDataUrl;
 
-  body.innerHTML = `
+  details.hidden = false;
+  details.innerHTML = `
     <input class="inline-input" id="edit-title" value="${item.title}">
     <textarea class="inline-textarea" id="edit-desc">${item.description}</textarea>
     <input class="inline-input" id="edit-cat" value="${item.category}">
     <button class="btn small" id="changeImageBtn">Change Image</button>
+    <button class="btn small" id="removeImageBtn">Remove Image</button>
   `;
 
   actions.innerHTML = `
@@ -200,13 +187,7 @@ function enterEditMode(card, item) {
     <button class="btn small delete-btn">Delete</button>
   `;
 
-  actions.querySelector('.delete-btn').addEventListener('click', () => {
-    state.items = state.items.filter(i => i.id !== item.id);
-    save();
-    render();
-  });
-
-  body.querySelector('#changeImageBtn').addEventListener('click', async () => {
+  details.querySelector('#changeImageBtn').addEventListener('click', async () => {
     const picker = document.createElement('input');
     picker.type = 'file';
     picker.accept = 'image/*';
@@ -215,41 +196,33 @@ function enterEditMode(card, item) {
       if (file) {
         const newDataUrl = await compressImageToDataUrl(file);
         item.thumbDataUrl = newDataUrl;
-
-        const thumb = card.querySelector('.thumb');
-        if (thumb) {
-          thumb.src = newDataUrl;
-          thumb.alt = item.title || "Item image";
-        }
+        thumb.src = newDataUrl;
       }
     };
     picker.click();
   });
 
-  actions.querySelector('#saveEditBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  details.querySelector('#removeImageBtn').addEventListener('click', () => {
+    item.thumbDataUrl = "";
+    thumb.src = "";
+  });
 
-    const newTitle = body.querySelector('#edit-title').value.trim();
-    const newDesc = body.querySelector('#edit-desc').value.trim();
-    const newCat = body.querySelector('#edit-cat').value.trim();
-
-    if (!newTitle || !newCat) {
-      alert("Title and category are required.");
-      return;
-    }
-
-    item.title = newTitle;
-    item.description = newDesc;
-    item.category = newCat;
-
+  actions.querySelector('#saveEditBtn').addEventListener('click', () => {
+    item.title = details.querySelector('#edit-title').value.trim();
+    item.description = details.querySelector('#edit-desc').value.trim();
+    item.category = details.querySelector('#edit-cat').value.trim();
     save();
     render();
   });
 
-  actions.querySelector('#cancelEditBtn').addEventListener('click', (e) => {
-    e.preventDefault();
+  actions.querySelector('#cancelEditBtn').addEventListener('click', () => {
     item.thumbDataUrl = originalImage;
+    render();
+  });
+
+  actions.querySelector('.delete-btn').addEventListener('click', () => {
+    state.items = state.items.filter(i => i.id !== item.id);
+    save();
     render();
   });
 }
@@ -257,22 +230,17 @@ function enterEditMode(card, item) {
 /* ---------- ADD ITEM FORM ---------- */
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const title = els.title.value.trim();
   const description = els.description.value.trim();
   const category = els.category.value.trim();
   const file = els.imageInput.files?.[0];
-
   if (!title || !category) {
     alert("Please provide title and category.");
     return;
   }
-
   let thumbDataUrl = "";
   if (file) thumbDataUrl = await compressImageToDataUrl(file);
-
   const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
-
   if (!navigator.onLine) {
     state.pendingQueue.push(item);
     saveQueue();
@@ -280,10 +248,10 @@ els.form.addEventListener('submit', async (e) => {
     state.items.push(item);
     save();
   }
-
-  els.form.reset();
+    els.form.reset();
   render();
 
+  // Show tooltip after adding item
   els.tooltip.hidden = false;
   els.tooltip.classList.add('show');
   setTimeout(() => {
