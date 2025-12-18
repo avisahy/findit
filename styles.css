@@ -213,6 +213,10 @@ body {
 }
 .card-body { padding: 1rem; }
 .card-actions { display: flex; justify-content: space-between; padding: .75rem; }
+.card-details {
+  padding: 1rem;
+}
+
 
 /* INLINE EDIT FIELDS */
 .inline-input,
