@@ -140,19 +140,30 @@ function render() {
     d.textContent = item.description;
     c.textContent = item.category;
 
-    /* INLINE PREVIEW EXPANSION */
-    img.addEventListener('click', () => {
+    /* FLOATING OVERLAY PREVIEW */
+    img.addEventListener('click', (e) => {
       if (!item.thumbDataUrl) return;
-      let preview = node.querySelector('.preview');
-      if (!preview) {
-        preview = document.createElement('img');
-        preview.className = 'preview';
-        preview.src = item.thumbDataUrl;
-        preview.alt = item.title;
-        node.querySelector('.card-body').appendChild(preview);
-      } else {
-        preview.remove();
-      }
+
+      // remove existing overlay
+      document.querySelectorAll('.preview-overlay').forEach(el => el.remove());
+
+      const overlay = document.createElement('div');
+      overlay.className = 'preview-overlay';
+
+      const bigImg = document.createElement('img');
+      bigImg.src = item.thumbDataUrl;
+      bigImg.alt = item.title;
+
+      overlay.appendChild(bigImg);
+      document.body.appendChild(overlay);
+
+      // position near clicked image
+      const rect = e.target.getBoundingClientRect();
+      overlay.style.top = `${rect.bottom + window.scrollY + 5}px`;
+      overlay.style.left = `${rect.left + window.scrollX}px`;
+
+      // close on click
+      overlay.addEventListener('click', () => overlay.remove());
     });
 
     /* DELETE */
@@ -182,7 +193,6 @@ function enterEditMode(card, item) {
   const body = card.querySelector('.card-body');
   const actions = card.querySelector('.card-actions');
 
-  // ✅ keep a copy of the original image
   const originalImage = item.thumbDataUrl;
 
   body.innerHTML = `
@@ -198,14 +208,12 @@ function enterEditMode(card, item) {
     <button class="btn small delete-btn">Delete</button>
   `;
 
-  // Delete
   actions.querySelector('.delete-btn').addEventListener('click', () => {
     state.items = state.items.filter(i => i.id !== item.id);
     save();
     render();
   });
 
-  // Change Image (preview fix)
   body.querySelector('#changeImageBtn').addEventListener('click', async () => {
     const picker = document.createElement('input');
     picker.type = 'file';
@@ -216,7 +224,6 @@ function enterEditMode(card, item) {
         const newDataUrl = await compressImageToDataUrl(file);
         item.thumbDataUrl = newDataUrl;
 
-        // ✅ update preview immediately
         const thumb = card.querySelector('.thumb');
         if (thumb) {
           thumb.src = newDataUrl;
@@ -227,7 +234,6 @@ function enterEditMode(card, item) {
     picker.click();
   });
 
-  // Save
   actions.querySelector('#saveEditBtn').addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -249,13 +255,9 @@ function enterEditMode(card, item) {
     render();
   });
 
-  // Cancel
   actions.querySelector('#cancelEditBtn').addEventListener('click', (e) => {
     e.preventDefault();
-
-    // ✅ restore original image
     item.thumbDataUrl = originalImage;
-
     render();
   });
 }
@@ -277,13 +279,7 @@ els.form.addEventListener('submit', async (e) => {
   let thumbDataUrl = "";
   if (file) thumbDataUrl = await compressImageToDataUrl(file);
 
-    const item = { 
-    id: crypto.randomUUID(), 
-    title, 
-    description, 
-    category, 
-    thumbDataUrl 
-  };
+  const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
 
   if (!navigator.onLine) {
     state.pendingQueue.push(item);
