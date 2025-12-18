@@ -1,4 +1,4 @@
-/* FindIt Catalog PWA - Simplified Card Version */
+/* FindIt Catalog PWA - Full Version with Details Overlay + Inline Edit */
 
 /* ---------- STATE ---------- */
 const state = {
@@ -34,7 +34,12 @@ const els = {
   tooltip: document.getElementById('tooltip'),
 
   imageOverlay: document.getElementById('imageOverlay'),
-  overlayImage: document.getElementById('overlayImage')
+  overlayImage: document.getElementById('overlayImage'),
+
+  detailsOverlay: document.getElementById('detailsOverlay'),
+  overlayTitle: document.getElementById('overlayTitle'),
+  overlayDesc: document.getElementById('overlayDesc'),
+  overlayCat: document.getElementById('overlayCat')
 };
 
 const STORAGE_KEY = 'itemCatalog.v1';
@@ -115,21 +120,24 @@ function render() {
 
   filtered.forEach(item => {
     const node = els.template.content.firstElementChild.cloneNode(true);
+
     const img = node.querySelector('.thumb');
     const t = node.querySelector('.card-title');
     const d = node.querySelector('.card-desc');
     const c = node.querySelector('.card-cat');
-    const del = node.querySelector('.delete-btn');
-    const edit = node.querySelector('.edit-btn');
+
+    const detailsBtn = node.querySelector('.details-btn');
+    const editBtn = node.querySelector('.edit-btn');
+    const delBtn = node.querySelector('.delete-btn');
 
     img.src = item.thumbDataUrl || '';
-    img.alt = item.thumbDataUrl ? item.title : "";
+    img.alt = item.title || "";
 
     t.textContent = item.title;
     d.textContent = item.description;
     c.textContent = item.category;
 
-    /* FULLSCREEN OVERLAY PREVIEW */
+    /* IMAGE OVERLAY */
     img.addEventListener('click', () => {
       if (!item.thumbDataUrl) return;
       els.overlayImage.src = item.thumbDataUrl;
@@ -138,15 +146,24 @@ function render() {
       els.imageOverlay.hidden = false;
     });
 
+    /* DETAILS OVERLAY */
+    detailsBtn.addEventListener('click', () => {
+      els.overlayTitle.textContent = item.title;
+      els.overlayDesc.textContent = item.description;
+      els.overlayCat.textContent = item.category;
+      els.detailsOverlay.style.top = `${window.scrollY}px`;
+      els.detailsOverlay.hidden = false;
+    });
+
     /* DELETE */
-    del.addEventListener('click', () => {
+    delBtn.addEventListener('click', () => {
       state.items = state.items.filter(i => i.id !== item.id);
       save();
       render();
     });
 
-    /* EDIT DETAILS */
-    edit.addEventListener('click', () => enterEditMode(node, item));
+    /* EDIT */
+    editBtn.addEventListener('click', () => enterEditMode(node, item));
 
     els.grid.appendChild(node);
   });
@@ -154,9 +171,12 @@ function render() {
   els.grid.setAttribute('aria-busy', 'false');
 }
 
-/* ---------- CLOSE OVERLAY ---------- */
+/* ---------- CLOSE OVERLAYS ---------- */
 els.imageOverlay.addEventListener('click', () => {
   els.imageOverlay.hidden = true;
+});
+els.detailsOverlay.addEventListener('click', () => {
+  els.detailsOverlay.hidden = true;
 });
 
 /* ---------- SEARCH ---------- */
@@ -170,6 +190,7 @@ function enterEditMode(card, item) {
   const details = card.querySelector('.card-details');
   const actions = card.querySelector('.card-actions');
   const thumb = card.querySelector('.thumb');
+
   const originalImage = item.thumbDataUrl;
 
   details.hidden = false;
@@ -187,6 +208,7 @@ function enterEditMode(card, item) {
     <button class="btn small delete-btn">Delete</button>
   `;
 
+  /* CHANGE IMAGE */
   details.querySelector('#changeImageBtn').addEventListener('click', async () => {
     const picker = document.createElement('input');
     picker.type = 'file';
@@ -202,11 +224,13 @@ function enterEditMode(card, item) {
     picker.click();
   });
 
+  /* REMOVE IMAGE */
   details.querySelector('#removeImageBtn').addEventListener('click', () => {
     item.thumbDataUrl = "";
     thumb.src = "";
   });
 
+  /* SAVE */
   actions.querySelector('#saveEditBtn').addEventListener('click', () => {
     item.title = details.querySelector('#edit-title').value.trim();
     item.description = details.querySelector('#edit-desc').value.trim();
@@ -215,11 +239,13 @@ function enterEditMode(card, item) {
     render();
   });
 
+  /* CANCEL */
   actions.querySelector('#cancelEditBtn').addEventListener('click', () => {
     item.thumbDataUrl = originalImage;
     render();
   });
 
+  /* DELETE */
   actions.querySelector('.delete-btn').addEventListener('click', () => {
     state.items = state.items.filter(i => i.id !== item.id);
     save();
@@ -230,17 +256,22 @@ function enterEditMode(card, item) {
 /* ---------- ADD ITEM FORM ---------- */
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const title = els.title.value.trim();
   const description = els.description.value.trim();
   const category = els.category.value.trim();
   const file = els.imageInput.files?.[0];
+
   if (!title || !category) {
     alert("Please provide title and category.");
     return;
   }
+
   let thumbDataUrl = "";
   if (file) thumbDataUrl = await compressImageToDataUrl(file);
+
   const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
+
   if (!navigator.onLine) {
     state.pendingQueue.push(item);
     saveQueue();
@@ -248,10 +279,10 @@ els.form.addEventListener('submit', async (e) => {
     state.items.push(item);
     save();
   }
-    els.form.reset();
+
+  els.form.reset();
   render();
 
-  // Show tooltip after adding item
   els.tooltip.hidden = false;
   els.tooltip.classList.add('show');
   setTimeout(() => {
@@ -266,7 +297,6 @@ function exportJSON() {
   const url = URL.createObjectURL(blob);
   triggerDownload(url, "items.json");
 }
-
 function exportCSV() {
   const headers = ["id", "title", "description", "category", "thumbDataUrl"];
   const rows = state.items.map(i =>
@@ -277,7 +307,6 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   triggerDownload(url, "items.csv");
 }
-
 function triggerDownload(url, name) {
   const a = document.createElement("a");
   a.href = url;
@@ -287,13 +316,11 @@ function triggerDownload(url, name) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 }
-
 els.exportJsonBtn.addEventListener("click", exportJSON);
 els.exportCsvBtn.addEventListener("click", exportCSV);
 
 /* ---------- IMPORT ---------- */
 els.importBtn.addEventListener("click", () => els.importFile.click());
-
 els.importFile.addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -312,7 +339,6 @@ els.importFile.addEventListener("change", async (e) => {
     alert("Invalid file format.");
   }
 });
-
 function parseCSV(text) {
   const [headerLine, ...lines] = text.trim().split("\n");
   const headers = headerLine.split(",");
@@ -339,7 +365,6 @@ async function requestNotifications() {
     console.warn("Notification error", e);
   }
 }
-
 function scheduleReminder() {
   setTimeout(() => {
     if (document.visibilityState === "visible" &&
@@ -350,9 +375,8 @@ function scheduleReminder() {
         icon: "icons/icon-192.png"
       });
     }
-  }, 1000 * 60 * 30); // 30 minutes
+  }, 1000 * 60 * 30);
 }
-
 els.notifyBtn.addEventListener("click", requestNotifications);
 
 /* ---------- INSTALL PROMPT ---------- */
