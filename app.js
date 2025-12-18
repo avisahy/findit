@@ -168,7 +168,7 @@ function render() {
 
 /* ---------- EXIT IMAGE MODAL ---------- */
 els.modal.addEventListener('click', () => {
-  els.modal.hidden = true; // ✅ ensures modal hides and no longer blocks clicks
+  els.modal.hidden = true;
 });
 
 /* ---------- SEARCH ---------- */
@@ -202,14 +202,24 @@ function enterEditMode(card, item) {
     render();
   });
 
-  // Change Image
+  // Change Image (preview fix)
   body.querySelector('#changeImageBtn').addEventListener('click', async () => {
     const picker = document.createElement('input');
     picker.type = 'file';
     picker.accept = 'image/*';
     picker.onchange = async () => {
       const file = picker.files[0];
-      if (file) item.thumbDataUrl = await compressImageToDataUrl(file);
+      if (file) {
+        const newDataUrl = await compressImageToDataUrl(file);
+        item.thumbDataUrl = newDataUrl;
+
+        // ✅ update preview immediately
+        const thumb = card.querySelector('.thumb');
+        if (thumb) {
+          thumb.src = newDataUrl;
+          thumb.alt = item.title || "Item image";
+        }
+      }
     };
     picker.click();
   });
@@ -270,7 +280,7 @@ els.form.addEventListener('submit', async (e) => {
     save();
   }
 
-  els.form.reset();
+    els.form.reset();
   render();
 
   // ✅ Tooltip after adding item
@@ -279,7 +289,7 @@ els.form.addEventListener('submit', async (e) => {
   setTimeout(() => {
     els.tooltip.classList.remove('show');
     els.tooltip.hidden = true;
-    }, 5000);
+  }, 5000);
 });
 
 /* ---------- EXPORT ---------- */
