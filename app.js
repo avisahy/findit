@@ -1,4 +1,4 @@
-/* FindIt Catalog PWA - Full Version with Details Overlay + Inline Edit */
+/* FindIt Catalog PWA - Full Version with Image, Details, and Edit Overlays */
 
 /* ---------- STATE ---------- */
 const state = {
@@ -39,7 +39,18 @@ const els = {
   detailsOverlay: document.getElementById('detailsOverlay'),
   overlayTitle: document.getElementById('overlayTitle'),
   overlayDesc: document.getElementById('overlayDesc'),
-  overlayCat: document.getElementById('overlayCat')
+  overlayCat: document.getElementById('overlayCat'),
+
+  editOverlay: document.getElementById('editOverlay'),
+  editForm: document.getElementById('editForm'),
+  editTitle: document.getElementById('editTitle'),
+  editDesc: document.getElementById('editDesc'),
+  editCat: document.getElementById('editCat'),
+  changeImageBtn: document.getElementById('changeImageBtn'),
+  removeImageBtn: document.getElementById('removeImageBtn'),
+  saveEditBtn: document.getElementById('saveEditBtn'),
+  cancelEditBtn: document.getElementById('cancelEditBtn'),
+  deleteEditBtn: document.getElementById('deleteEditBtn')
 };
 
 const STORAGE_KEY = 'itemCatalog.v1';
@@ -122,20 +133,12 @@ function render() {
     const node = els.template.content.firstElementChild.cloneNode(true);
 
     const img = node.querySelector('.thumb');
-    const t = node.querySelector('.card-title');
-    const d = node.querySelector('.card-desc');
-    const c = node.querySelector('.card-cat');
-
     const detailsBtn = node.querySelector('.details-btn');
     const editBtn = node.querySelector('.edit-btn');
     const delBtn = node.querySelector('.delete-btn');
 
     img.src = item.thumbDataUrl || '';
     img.alt = item.title || "";
-
-    t.textContent = item.title;
-    d.textContent = item.description;
-    c.textContent = item.category;
 
     /* IMAGE OVERLAY */
     img.addEventListener('click', () => {
@@ -162,8 +165,8 @@ function render() {
       render();
     });
 
-    /* EDIT */
-    editBtn.addEventListener('click', () => enterEditMode(node, item));
+    /* EDIT OVERLAY */
+    editBtn.addEventListener('click', () => openEditOverlay(item));
 
     els.grid.appendChild(node);
   });
@@ -175,8 +178,11 @@ function render() {
 els.imageOverlay.addEventListener('click', () => {
   els.imageOverlay.hidden = true;
 });
-els.detailsOverlay.addEventListener('click', () => {
-  els.detailsOverlay.hidden = true;
+els.detailsOverlay.addEventListener('click', (e) => {
+  if (e.target === els.detailsOverlay) els.detailsOverlay.hidden = true;
+});
+els.editOverlay.addEventListener('click', (e) => {
+  if (e.target === els.editOverlay) els.editOverlay.hidden = true;
 });
 
 /* ---------- SEARCH ---------- */
@@ -185,31 +191,15 @@ els.searchInput.addEventListener('input', () => {
   render();
 });
 
-/* ---------- INLINE EDIT MODE ---------- */
-function enterEditMode(card, item) {
-  const details = card.querySelector('.card-details');
-  const actions = card.querySelector('.card-actions');
-  const thumb = card.querySelector('.thumb');
+/* ---------- EDIT OVERLAY ---------- */
+function openEditOverlay(item) {
+  els.editTitle.value = item.title;
+  els.editDesc.value = item.description;
+  els.editCat.value = item.category;
+  els.editOverlay.style.top = `${window.scrollY}px`;
+  els.editOverlay.hidden = false;
 
-  const originalImage = item.thumbDataUrl;
-
-  details.hidden = false;
-  details.innerHTML = `
-    <input class="inline-input" id="edit-title" value="${item.title}">
-    <textarea class="inline-textarea" id="edit-desc">${item.description}</textarea>
-    <input class="inline-input" id="edit-cat" value="${item.category}">
-    <button class="btn small" id="changeImageBtn">Change Image</button>
-    <button class="btn small" id="removeImageBtn">Remove Image</button>
-  `;
-
-  actions.innerHTML = `
-    <button class="btn small primary" id="saveEditBtn">Save</button>
-    <button class="btn small" id="cancelEditBtn">Cancel</button>
-    <button class="btn small delete-btn">Delete</button>
-  `;
-
-  /* CHANGE IMAGE */
-  details.querySelector('#changeImageBtn').addEventListener('click', async () => {
+  els.changeImageBtn.onclick = async () => {
     const picker = document.createElement('input');
     picker.type = 'file';
     picker.accept = 'image/*';
@@ -218,39 +208,37 @@ function enterEditMode(card, item) {
       if (file) {
         const newDataUrl = await compressImageToDataUrl(file);
         item.thumbDataUrl = newDataUrl;
-        thumb.src = newDataUrl;
+        render();
       }
     };
     picker.click();
-  });
+  };
 
-  /* REMOVE IMAGE */
-  details.querySelector('#removeImageBtn').addEventListener('click', () => {
+  els.removeImageBtn.onclick = () => {
     item.thumbDataUrl = "";
-    thumb.src = "";
-  });
+    render();
+  };
 
-  /* SAVE */
-  actions.querySelector('#saveEditBtn').addEventListener('click', () => {
-    item.title = details.querySelector('#edit-title').value.trim();
-    item.description = details.querySelector('#edit-desc').value.trim();
-    item.category = details.querySelector('#edit-cat').value.trim();
+  els.editForm.onsubmit = (e) => {
+    e.preventDefault();
+    item.title = els.editTitle.value.trim();
+    item.description = els.editDesc.value.trim();
+    item.category = els.editCat.value.trim();
     save();
     render();
-  });
+    els.editOverlay.hidden = true;
+  };
 
-  /* CANCEL */
-  actions.querySelector('#cancelEditBtn').addEventListener('click', () => {
-    item.thumbDataUrl = originalImage;
-    render();
-  });
+  els.cancelEditBtn.onclick = () => {
+    els.editOverlay.hidden = true;
+  };
 
-  /* DELETE */
-  actions.querySelector('.delete-btn').addEventListener('click', () => {
+  els.deleteEditBtn.onclick = () => {
     state.items = state.items.filter(i => i.id !== item.id);
     save();
     render();
-  });
+    els.editOverlay.hidden = true;
+  };
 }
 
 /* ---------- ADD ITEM FORM ---------- */
@@ -262,15 +250,23 @@ els.form.addEventListener('submit', async (e) => {
   const category = els.category.value.trim();
   const file = els.imageInput.files?.[0];
 
-  if (!title || !category) {
-    alert("Please provide title and category.");
+    if (!title || !category) {
+    alert("Please provide both a title and a category.");
     return;
   }
 
   let thumbDataUrl = "";
-  if (file) thumbDataUrl = await compressImageToDataUrl(file);
+  if (file) {
+    thumbDataUrl = await compressImageToDataUrl(file);
+  }
 
-  const item = { id: crypto.randomUUID(), title, description, category, thumbDataUrl };
+  const item = {
+    id: crypto.randomUUID(),
+    title,
+    description,
+    category,
+    thumbDataUrl
+  };
 
   if (!navigator.onLine) {
     state.pendingQueue.push(item);
@@ -283,12 +279,13 @@ els.form.addEventListener('submit', async (e) => {
   els.form.reset();
   render();
 
+  // Show tooltip after adding item
   els.tooltip.hidden = false;
   els.tooltip.classList.add('show');
   setTimeout(() => {
     els.tooltip.classList.remove('show');
     els.tooltip.hidden = true;
-  }, 5000);
+  }, 4000);
 });
 
 /* ---------- EXPORT ---------- */
@@ -375,7 +372,7 @@ function scheduleReminder() {
         icon: "icons/icon-192.png"
       });
     }
-  }, 1000 * 60 * 30);
+  }, 1000 * 60 * 30); // 30 minutes
 }
 els.notifyBtn.addEventListener("click", requestNotifications);
 
