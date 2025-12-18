@@ -32,7 +32,9 @@ const els = {
   template: document.getElementById('itemCardTemplate'),
 
   modal: document.getElementById('imageModal'),
-  modalImg: document.getElementById('modalImage')
+  modalImg: document.getElementById('modalImage'),
+
+  tooltip: document.getElementById('tooltip')
 };
 
 const STORAGE_KEY = 'itemCatalog.v1';
@@ -166,7 +168,7 @@ function render() {
 
 /* ---------- EXIT IMAGE MODAL ---------- */
 els.modal.addEventListener('click', () => {
-  els.modal.hidden = true;
+  els.modal.hidden = true; // ✅ ensures modal hides and no longer blocks clicks
 });
 
 /* ---------- SEARCH ---------- */
@@ -193,31 +195,30 @@ function enterEditMode(card, item) {
     <button class="btn small delete-btn">Delete</button>
   `;
 
-  /* DELETE still works */
+  // Delete
   actions.querySelector('.delete-btn').addEventListener('click', () => {
     state.items = state.items.filter(i => i.id !== item.id);
     save();
     render();
   });
 
-  /* CHANGE IMAGE */
-  const changeBtn = body.querySelector('#changeImageBtn');
-  changeBtn.addEventListener('click', async () => {
+  // Change Image
+  body.querySelector('#changeImageBtn').addEventListener('click', async () => {
     const picker = document.createElement('input');
     picker.type = 'file';
     picker.accept = 'image/*';
-
     picker.onchange = async () => {
       const file = picker.files[0];
-      if (!file) return;
-      item.thumbDataUrl = await compressImageToDataUrl(file);
+      if (file) item.thumbDataUrl = await compressImageToDataUrl(file);
     };
-
     picker.click();
   });
 
-  /* SAVE */
-  actions.querySelector('#saveEditBtn').addEventListener('click', () => {
+  // Save
+  actions.querySelector('#saveEditBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     const newTitle = body.querySelector('#edit-title').value.trim();
     const newDesc = body.querySelector('#edit-desc').value.trim();
     const newCat = body.querySelector('#edit-cat').value.trim();
@@ -235,15 +236,17 @@ function enterEditMode(card, item) {
     render();
   });
 
-  /* CANCEL */
-  actions.querySelector('#cancelEditBtn').addEventListener('click', () => {
+  // Cancel
+  actions.querySelector('#cancelEditBtn').addEventListener('click', (e) => {
+    e.preventDefault();
     render();
   });
 }
 
-/* ADD ITEM FORM */
+/* ---------- ADD ITEM FORM ---------- */
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const title = els.title.value.trim();
   const description = els.description.value.trim();
   const category = els.category.value.trim();
@@ -270,72 +273,14 @@ els.form.addEventListener('submit', async (e) => {
   els.form.reset();
   render();
 
-  // ✅ Tooltip
-  const tooltip = document.getElementById('tooltip');
-  tooltip.hidden = false;
-  tooltip.classList.add('show');
+  // ✅ Tooltip after adding item
+  els.tooltip.hidden = false;
+  els.tooltip.classList.add('show');
   setTimeout(() => {
-    tooltip.classList.remove('show');
-    tooltip.hidden = true;
-  }, 5000);
+    els.tooltip.classList.remove('show');
+    els.tooltip.hidden = true;
+    }, 5000);
 });
-
-/* INLINE EDIT MODE FIX */
-function enterEditMode(card, item) {
-  const body = card.querySelector('.card-body');
-  const actions = card.querySelector('.card-actions');
-
-  body.innerHTML = `
-    <input class="inline-input" id="edit-title" value="${item.title}">
-    <textarea class="inline-textarea" id="edit-desc">${item.description}</textarea>
-    <input class="inline-input" id="edit-cat" value="${item.category}">
-    <button class="btn small" id="changeImageBtn">Change Image</button>
-  `;
-
-  actions.innerHTML = `
-    <button class="btn small primary" id="saveEditBtn">Save</button>
-    <button class="btn small" id="cancelEditBtn">Cancel</button>
-    <button class="btn small delete-btn">Delete</button>
-  `;
-
-  // Delete
-  actions.querySelector('.delete-btn').addEventListener('click', () => {
-    state.items = state.items.filter(i => i.id !== item.id);
-    save(); render();
-  });
-
-  // Change Image
-  body.querySelector('#changeImageBtn').addEventListener('click', async () => {
-    const picker = document.createElement('input');
-    picker.type = 'file'; picker.accept = 'image/*';
-    picker.onchange = async () => {
-      const file = picker.files[0];
-      if (file) item.thumbDataUrl = await compressImageToDataUrl(file);
-    };
-    picker.click();
-  });
-
-  // Save
-  actions.querySelector('#saveEditBtn').addEventListener('click', (e) => {
-    e.preventDefault(); e.stopPropagation();
-    const newTitle = body.querySelector('#edit-title').value.trim();
-    const newDesc = body.querySelector('#edit-desc').value.trim();
-    const newCat = body.querySelector('#edit-cat').value.trim();
-    if (!newTitle || !newCat) { alert("Title and category are required."); return; }
-        item.title = newTitle;
-    item.description = newDesc;
-    item.category = newCat;
-
-    save();
-    render();
-  });
-
-  // Cancel
-  actions.querySelector('#cancelEditBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    render();
-  });
-}
 
 /* ---------- EXPORT ---------- */
 function exportJSON() {
